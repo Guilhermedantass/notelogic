@@ -1,5 +1,6 @@
 package dev.guilherme.notelogic.tarefa;
 
+import java.time.Clock;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -14,10 +15,12 @@ public class TarefaService {
 
     private final TarefaRepository repository;
     private final MateriaService materias;
+    private final Clock clock;
 
-    public TarefaService(TarefaRepository repository, MateriaService materias) {
+    public TarefaService(TarefaRepository repository, MateriaService materias, Clock clock) {
         this.repository = repository;
         this.materias = materias;
+        this.clock = clock;
     }
 
     @Transactional(readOnly = true)
@@ -47,7 +50,7 @@ public class TarefaService {
     @Transactional
     public Tarefa concluir(Long id) {
         Tarefa tarefa = buscar(id);
-        tarefa.concluir(); // sem save: o Hibernate percebe a mudança e faz o UPDATE no fim da transação
+        tarefa.concluir(clock.instant()); // sem save: o Hibernate percebe a mudança e faz o UPDATE no fim da transação
         return tarefa;
     }
 

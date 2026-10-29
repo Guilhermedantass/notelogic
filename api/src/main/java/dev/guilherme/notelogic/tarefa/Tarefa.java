@@ -34,6 +34,9 @@ public class Tarefa {
     @Column(nullable = false, updatable = false)
     private Instant criadaEm;
 
+    /** Quando foi concluída pela última vez (nulo enquanto pendente). Alimenta as estatísticas. */
+    private Instant concluidaEm;
+
     /** Opcional: uma tarefa pode não ser de matéria nenhuma. */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "materia_id")
@@ -64,12 +67,14 @@ public class Tarefa {
         this.prioridade = prioridade != null ? prioridade : Prioridade.MEDIA;
     }
 
-    public void concluir() {
+    public void concluir(Instant agora) {
         this.concluida = true;
+        this.concluidaEm = agora;
     }
 
     public void reabrir() {
         this.concluida = false;
+        this.concluidaEm = null;
     }
 
     public Long getId() {
@@ -90,6 +95,10 @@ public class Tarefa {
 
     public Instant getCriadaEm() {
         return criadaEm;
+    }
+
+    public Instant getConcluidaEm() {
+        return concluidaEm;
     }
 
     public Materia getMateria() {

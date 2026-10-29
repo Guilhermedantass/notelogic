@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.Instant;
 import java.time.LocalDate;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -99,10 +100,12 @@ class TarefaControllerTests {
                 .andExpect(jsonPath("$.titulo").value("Novo"));
 
         mvc.perform(patch("/api/tarefas/{id}/concluir", id))
-                .andExpect(jsonPath("$.concluida").value(true));
+                .andExpect(jsonPath("$.concluida").value(true))
+                .andExpect(jsonPath("$.concluidaEm").isNotEmpty());
 
         mvc.perform(patch("/api/tarefas/{id}/reabrir", id))
-                .andExpect(jsonPath("$.concluida").value(false));
+                .andExpect(jsonPath("$.concluida").value(false))
+                .andExpect(jsonPath("$.concluidaEm").doesNotExist());
     }
 
     @Test
@@ -152,7 +155,7 @@ class TarefaControllerTests {
         repository.save(new Tarefa("Sem prazo", null, grafos, null, null));
         repository.save(new Tarefa("Prazo cedo", null, grafos, LocalDate.of(2026, 11, 1), null));
         Tarefa feita = new Tarefa("Já feita", null, grafos, LocalDate.of(2026, 10, 1), null);
-        feita.concluir();
+        feita.concluir(Instant.now());
         repository.save(feita);
         repository.save(new Tarefa("Vocabulário", null, ingles, null, null));
 
