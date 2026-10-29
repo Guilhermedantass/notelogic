@@ -1,0 +1,249 @@
+.cabecalho {
+  margin-bottom: 28px;
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 40px;
+  align-items: start;
+
+  @media (max-width: 1000px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ---- o timer ----
+
+.timer {
+  --cor-timer: var(--violeta);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  padding: 32px 24px;
+  border: 1px solid var(--borda);
+  border-radius: 24px;
+  background: var(--superficie);
+
+  &.pausa {
+    --cor-timer: var(--verde);
+  }
+}
+
+.tipos {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--fundo);
+  border: 1px solid var(--borda);
+
+  button {
+    padding: 8px 16px;
+    border-radius: 9px;
+    font-weight: 600;
+    color: var(--texto-suave);
+    transition: background 0.15s, color 0.15s;
+
+    &:hover {
+      color: var(--texto);
+    }
+
+    &.ativo {
+      background: var(--cor-timer);
+      color: #fff;
+    }
+  }
+}
+
+.circulo {
+  position: relative;
+  width: min(300px, 80vw);
+  aspect-ratio: 1;
+
+  svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg); // o traço começa no topo, não à direita
+  }
+
+  circle {
+    fill: none;
+    stroke-width: 14;
+  }
+}
+
+.trilho {
+  stroke: var(--borda);
+}
+
+// stroke-dasharray = circunferência inteira (um traço só);
+// stroke-dashoffset empurra o traço para fora conforme o tempo passa, e o anel vai se esvaziando.
+.progresso {
+  stroke: var(--cor-timer);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.3s linear, stroke 0.3s;
+}
+
+.centro {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+  padding: 0 40px;
+}
+
+.tempo {
+  font-size: 3.6rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums; // dígitos com a mesma largura: o número não "treme"
+}
+
+.rotulo {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--cor-timer);
+}
+
+.vinculo {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.controles {
+  display: flex;
+  gap: 10px;
+}
+
+.configuracao {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  width: min(360px, 100%);
+}
+
+.duracao {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: var(--texto-suave);
+
+  strong {
+    font-size: 1.2rem;
+    color: var(--texto);
+  }
+}
+
+.iniciar {
+  justify-content: center;
+  padding: 12px;
+  font-size: 1rem;
+  background: var(--cor-timer);
+
+  &:hover {
+    background: var(--cor-timer);
+    filter: brightness(1.1);
+  }
+}
+
+// ---- histórico ----
+
+.historico {
+  h2 {
+    margin-bottom: 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--texto-suave);
+  }
+
+  ul {
+    list-style: none;
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--borda);
+  }
+
+  .vazio {
+    color: var(--texto-suave);
+    font-size: 0.9rem;
+  }
+}
+
+.hora {
+  width: 44px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--texto-suave);
+  font-variant-numeric: tabular-nums;
+}
+
+.marca {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--violeta);
+
+  .pausa & {
+    background: var(--verde);
+  }
+
+  .interrompida & {
+    background: transparent;
+    border: 2px solid var(--texto-suave);
+  }
+}
+
+.info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  .tipo {
+    font-weight: 600;
+  }
+
+  .detalhe {
+    font-size: 0.8rem;
+    color: var(--texto-suave);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.minutos {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+
+  .icone {
+    font-size: 16px;
+    color: var(--texto-suave);
+  }
+}

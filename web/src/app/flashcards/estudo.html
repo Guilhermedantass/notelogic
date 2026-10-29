@@ -1,0 +1,69 @@
+<header class="topo">
+  <a [routerLink]="['/flashcards', id()]" class="sair" aria-label="Sair do estudo"><span class="icone">close</span></a>
+  <div class="barra" role="progressbar" [attr.aria-valuenow]="progresso()" aria-valuemin="0" aria-valuemax="100">
+    <div class="preenchido" [style.width.%]="progresso()"></div>
+  </div>
+  <span class="contagem">{{ concluidos() }}/{{ total() }}</span>
+</header>
+
+@if (erro(); as mensagem) {
+  <div class="aviso-erro" role="alert">
+    <span class="icone">error</span>{{ mensagem }}
+    <button (click)="erro.set(null)" aria-label="Fechar"><span class="icone">close</span></button>
+  </div>
+}
+
+@if (atual(); as c) {
+  <p class="baralho-nome">{{ baralho.hasValue() ? baralho.value().nome : '' }}</p>
+
+  <button class="cartao" [class.virado]="virado()" (click)="virado.set(true)" [attr.aria-label]="virado() ? 'Resposta' : 'Virar cartão'">
+    <div class="interno">
+      <div class="face frente">
+        <span class="lado">Pergunta</span>
+        <p>{{ c.frente }}</p>
+        <span class="dica"><kbd>Espaço</kbd> para ver a resposta</span>
+      </div>
+      <div class="face verso">
+        <span class="lado">Resposta</span>
+        <p class="pergunta-pequena">{{ c.frente }}</p>
+        <p>{{ c.verso }}</p>
+      </div>
+    </div>
+  </button>
+
+  <div class="respostas" [class.visivel]="virado()">
+    @for (b of botoes; track b.resposta) {
+      <button class="resposta" [class]="b.resposta" [disabled]="!virado() || enviando()" (click)="responder(b.resposta)">
+        <span class="rotulo">{{ b.rotulo }}</span>
+        <span class="quando">{{ previsoes()[b.resposta] }}</span>
+        <kbd>{{ b.tecla }}</kbd>
+      </button>
+    }
+  </div>
+} @else if (terminou()) {
+  <section class="fim">
+    <span class="icone">celebration</span>
+    <h1 class="titulo-pagina">
+      @if (total() > 0) {
+        Sessão concluída!
+      } @else {
+        Nada para revisar hoje
+      }
+    </h1>
+    @if (total() > 0) {
+      <p class="subtitulo-pagina">Você revisou {{ total() }} {{ total() === 1 ? 'cartão' : 'cartões' }}.</p>
+      <ul class="resumo">
+        <li class="ERREI"><strong>{{ respostas().ERREI }}</strong> errei</li>
+        <li class="DIFICIL"><strong>{{ respostas().DIFICIL }}</strong> difícil</li>
+        <li class="BOM"><strong>{{ respostas().BOM }}</strong> bom</li>
+        <li class="FACIL"><strong>{{ respostas().FACIL }}</strong> fácil</li>
+      </ul>
+    } @else {
+      <p class="subtitulo-pagina">Todos os cartões deste baralho estão em dia.</p>
+    }
+    <div class="acoes-fim">
+      <a routerLink="/flashcards" class="botao secundario">Baralhos</a>
+      <a [routerLink]="['/flashcards', id()]" class="botao">Ver o baralho</a>
+    </div>
+  </section>
+}

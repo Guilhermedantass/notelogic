@@ -1,0 +1,128 @@
+<header class="cabecalho">
+  <h1 class="titulo-pagina">Pomodoro</h1>
+  <p class="subtitulo-pagina">
+    @if (segundosDeFocoHoje() > 0) {
+      {{ formatarDuracao(segundosDeFocoHoje()) }} de foco hoje · {{ focosConcluidos() }}
+      {{ focosConcluidos() === 1 ? 'pomodoro completo' : 'pomodoros completos' }}
+    } @else {
+      Blocos de foco com pausas entre eles.
+    }
+  </p>
+</header>
+
+@if (erro(); as mensagem) {
+  <div class="aviso-erro" role="alert">
+    <span class="icone">error</span>{{ mensagem }}
+    <button (click)="erro.set(null)" aria-label="Fechar"><span class="icone">close</span></button>
+  </div>
+}
+
+<div class="grade">
+  <section class="timer" [class.pausa]="tipoAtual() !== 'FOCO'" [class.rodando]="sessao()">
+    @if (!sessao()) {
+      <div class="tipos" role="radiogroup" aria-label="Tipo de sessão">
+        @for (t of tipos; track t.valor) {
+          <button
+            role="radio"
+            [attr.aria-checked]="tipo() === t.valor"
+            [class.ativo]="tipo() === t.valor"
+            (click)="escolherTipo(t.valor)"
+          >
+            {{ t.rotulo }}
+          </button>
+        }
+      </div>
+    }
+
+    <div class="circulo">
+      <svg viewBox="0 0 300 300" aria-hidden="true">
+        <circle class="trilho" cx="150" cy="150" [attr.r]="raio" />
+        <circle
+          class="progresso"
+          cx="150"
+          cy="150"
+          [attr.r]="raio"
+          [attr.stroke-dasharray]="circunferencia"
+          [attr.stroke-dashoffset]="circunferencia * progresso()"
+        />
+      </svg>
+      <div class="centro">
+        <span class="tempo">{{ relogio() }}</span>
+        <span class="rotulo">{{ rotuloTipo() }}</span>
+        @if (sessao(); as s) {
+          @if (s.tarefa) {
+            <span class="vinculo">{{ s.tarefa.titulo }}</span>
+          } @else if (s.materia) {
+            <span class="vinculo">{{ s.materia.nome }}</span>
+          }
+        }
+      </div>
+    </div>
+
+    @if (sessao()) {
+      <div class="controles">
+        <button class="botao secundario" (click)="interromper()"><span class="icone">stop</span>Interromper</button>
+        <button class="botao" (click)="concluir()"><span class="icone">check</span>Concluir agora</button>
+      </div>
+    } @else if (carregado()) {
+      <div class="configuracao">
+        <label class="duracao">
+          <button type="button" class="botao-icone" (click)="duracao.set(Math.max(1, duracao() - 5))" aria-label="Menos 5 minutos">
+            <span class="icone">remove</span>
+          </button>
+          <span><strong>{{ duracao() }}</strong> min</span>
+          <button type="button" class="botao-icone" (click)="duracao.set(Math.min(180, duracao() + 5))" aria-label="Mais 5 minutos">
+            <span class="icone">add</span>
+          </button>
+        </label>
+
+        @if (tipo() === 'FOCO') {
+          <select class="campo" [(ngModel)]="tarefaId" aria-label="Tarefa">
+            <option [ngValue]="null">Sem tarefa específica</option>
+            @for (t of listaTarefas(); track t.id) {
+              <option [ngValue]="t.id">{{ t.titulo }}{{ t.materia ? ' · ' + t.materia.nome : '' }}</option>
+            }
+          </select>
+          @if (tarefaId === null) {
+            <select class="campo" [(ngModel)]="materiaId" aria-label="Matéria">
+              <option [ngValue]="null">Sem matéria</option>
+              @for (m of listaMaterias(); track m.id) {
+                <option [ngValue]="m.id">{{ m.nome }}</option>
+              }
+            </select>
+          }
+        }
+
+        <button class="botao iniciar" (click)="iniciar()"><span class="icone">play_arrow</span>Começar</button>
+      </div>
+    }
+  </section>
+
+  <aside class="historico">
+    <h2>Hoje</h2>
+    <ul>
+      @for (s of sessoesDeHoje(); track s.id) {
+        <li [class.pausa]="s.tipo !== 'FOCO'" [class.interrompida]="s.status === 'INTERROMPIDA'">
+          <span class="hora">{{ horario(s.iniciadaEm) }}</span>
+          <span class="marca"></span>
+          <div class="info">
+            <span class="tipo">{{ rotuloDe(s.tipo) }}</span>
+            @if (s.tarefa) {
+              <span class="detalhe">{{ s.tarefa.titulo }}</span>
+            } @else if (s.materia) {
+              <span class="detalhe">{{ s.materia.nome }}</span>
+            }
+          </div>
+          <span class="minutos">
+            {{ formatarDuracao(s.segundosFocados ?? 0) }}
+            @if (s.status === 'INTERROMPIDA') {
+              <span class="icone" title="Interrompida">block</span>
+            }
+          </span>
+        </li>
+      } @empty {
+        <li class="vazio">Nenhuma sessão ainda hoje.</li>
+      }
+    </ul>
+  </aside>
+</div>

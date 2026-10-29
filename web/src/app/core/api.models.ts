@@ -41,3 +41,62 @@ export interface ProblemDetail {
   detail: string;
   erros?: Record<string, string>;
 }
+
+// ---- Flashcards ----
+
+export type Resposta = 'ERREI' | 'DIFICIL' | 'BOM' | 'FACIL';
+
+export interface Baralho {
+  id: number;
+  nome: string;
+  descricao: string | null;
+  materia: Materia | null;
+  totalCartoes: number;
+  paraRevisarHoje: number;
+}
+
+export interface BaralhoRequest {
+  nome: string;
+  descricao?: string | null;
+  materiaId?: number | null;
+}
+
+export interface Cartao {
+  id: number;
+  frente: string;
+  verso: string;
+  proximaRevisao: string;
+  intervaloDias: number;
+  repeticoes: number;
+  facilidade: number;
+}
+
+export interface CartaoRequest {
+  frente: string;
+  verso: string;
+}
+
+// ---- Pomodoro ----
+
+export type TipoSessao = 'FOCO' | 'PAUSA_CURTA' | 'PAUSA_LONGA';
+export type StatusSessao = 'EM_ANDAMENTO' | 'CONCLUIDA' | 'INTERROMPIDA';
+
+export interface Sessao {
+  id: number;
+  tipo: TipoSessao;
+  status: StatusSessao;
+  duracaoPlanejadaMin: number;
+  iniciadaEm: string;
+  fimPrevisto: string;
+  finalizadaEm: string | null;
+  segundosFocados: number | null;
+  tarefa: { id: number; titulo: string } | null;
+  materia: Materia | null;
+}
+
+export interface IniciarSessaoRequest {
+  tipo: TipoSessao;
+  duracaoMin?: number;
+  tarefaId?: number | null;
+  materiaId?: number | null;
+}

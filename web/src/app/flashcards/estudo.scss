@@ -1,0 +1,301 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.topo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  margin-bottom: 32px;
+}
+
+.sair {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--texto-suave);
+
+  &:hover {
+    background: var(--superficie);
+    color: var(--texto);
+  }
+}
+
+.barra {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--superficie);
+  overflow: hidden;
+}
+
+.preenchido {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--violeta);
+  transition: width 0.4s ease;
+}
+
+.contagem {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+  font-variant-numeric: tabular-nums;
+}
+
+.baralho-nome {
+  align-self: flex-start;
+  margin-bottom: 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--texto-suave);
+}
+
+// ---- o cartão que vira (3D) ----
+// perspective dá profundidade; preserve-3d mantém as duas faces no espaço 3D;
+// backface-visibility esconde a face que está de costas.
+
+.cartao {
+  width: 100%;
+  height: 340px;
+  perspective: 1200px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.interno {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.virado {
+  cursor: default;
+
+  .interno {
+    transform: rotateY(180deg);
+  }
+}
+
+.face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+  padding: 36px 40px;
+  border: 1px solid var(--borda);
+  border-radius: 20px;
+  background: var(--fundo);
+  box-shadow: var(--sombra);
+  backface-visibility: hidden;
+  overflow-y: auto;
+
+  p {
+    font-size: 1.35rem;
+    font-weight: 600;
+    line-height: 1.45;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+}
+
+.verso {
+  transform: rotateY(180deg);
+  border-color: var(--violeta);
+}
+
+.lado {
+  position: absolute;
+  top: 18px;
+  left: 24px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--violeta-texto);
+}
+
+.dica {
+  position: absolute;
+  bottom: 18px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+}
+
+.verso .pergunta-pequena {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--texto-suave);
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--borda);
+}
+
+kbd {
+  display: inline-block;
+  min-width: 20px;
+  padding: 1px 6px;
+  border: 1px solid var(--borda);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--texto-suave);
+  background: var(--superficie);
+}
+
+// ---- botões de resposta ----
+
+.respostas {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  width: 100%;
+  margin-top: 24px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none;
+
+  &.visivel {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+
+  @media (max-width: 560px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.resposta {
+  --cor-resposta: var(--violeta);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 8px;
+  border: 1px solid var(--borda);
+  border-radius: 14px;
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+
+  &:hover:not(:disabled) {
+    border-color: var(--cor-resposta);
+    background: color-mix(in srgb, var(--cor-resposta) 10%, transparent);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+
+  .rotulo {
+    font-weight: 700;
+    color: var(--cor-resposta);
+  }
+
+  .quando {
+    font-size: 0.8rem;
+    color: var(--texto-suave);
+  }
+
+  kbd {
+    margin-top: 4px;
+  }
+
+  &.ERREI {
+    --cor-resposta: var(--vermelho);
+  }
+
+  &.DIFICIL {
+    --cor-resposta: var(--laranja);
+  }
+
+  &.BOM {
+    --cor-resposta: var(--verde);
+  }
+
+  &.FACIL {
+    --cor-resposta: var(--violeta-texto);
+  }
+}
+
+// ---- fim da sessão ----
+
+.fim {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 40px;
+  text-align: center;
+
+  > .icone {
+    font-size: 64px;
+    color: var(--violeta);
+  }
+}
+
+.resumo {
+  display: flex;
+  gap: 12px;
+  margin: 20px 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 80px;
+    padding: 12px;
+    border-radius: 12px;
+    background: var(--superficie);
+    font-size: 0.8rem;
+    color: var(--texto-suave);
+
+    strong {
+      font-size: 1.5rem;
+    }
+  }
+
+  .ERREI strong {
+    color: var(--vermelho);
+  }
+
+  .DIFICIL strong {
+    color: var(--laranja);
+  }
+
+  .BOM strong {
+    color: var(--verde);
+  }
+
+  .FACIL strong {
+    color: var(--violeta-texto);
+  }
+}
+
+.acoes-fim {
+  display: flex;
+  gap: 10px;
+}

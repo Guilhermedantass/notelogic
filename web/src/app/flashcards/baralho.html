@@ -1,0 +1,122 @@
+<a routerLink="/flashcards" class="voltar"><span class="icone">arrow_back</span>Baralhos</a>
+
+@if (baralho.error()) {
+  <div class="aviso-erro" role="alert"><span class="icone">error</span>Baralho não encontrado.</div>
+}
+
+@if (baralho.hasValue()) {
+  @let b = baralho.value();
+  <header class="cabecalho" [style.--cor]="b.materia?.cor ?? 'var(--violeta)'">
+    @if (!editandoBaralho()) {
+      <div>
+        @if (b.materia; as m) {
+          <span class="etiqueta">{{ m.nome }}</span>
+        }
+        <h1 class="titulo-pagina">{{ b.nome }}</h1>
+        <p class="subtitulo-pagina">
+          {{ b.totalCartoes }} {{ b.totalCartoes === 1 ? 'cartão' : 'cartões' }} ·
+          {{ b.paraRevisarHoje }} para revisar hoje
+        </p>
+      </div>
+      <div class="acoes">
+        <button class="botao-icone" (click)="editarBaralho(b)" aria-label="Editar baralho">
+          <span class="icone">edit</span>
+        </button>
+        <button class="botao-icone perigo" (click)="removerBaralho(b)" aria-label="Apagar baralho">
+          <span class="icone">delete</span>
+        </button>
+        @if (b.paraRevisarHoje > 0) {
+          <a [routerLink]="['/flashcards', b.id, 'estudo']" class="botao">
+            <span class="icone">play_arrow</span>Estudar {{ b.paraRevisarHoje }}
+          </a>
+        }
+      </div>
+    } @else {
+      <form class="edicao-baralho" (ngSubmit)="salvarBaralho()">
+        <input class="campo" name="nome" [(ngModel)]="rascunhoBaralho.nome" autofocus />
+        <select class="campo" name="materia" [(ngModel)]="rascunhoBaralho.materiaId">
+          <option [ngValue]="null">Sem matéria</option>
+          @for (m of listaMaterias(); track m.id) {
+            <option [ngValue]="m.id">{{ m.nome }}</option>
+          }
+        </select>
+        <button type="button" class="botao secundario" (click)="editandoBaralho.set(false)">Cancelar</button>
+        <button type="submit" class="botao">Salvar</button>
+      </form>
+    }
+  </header>
+}
+
+@if (erro(); as mensagem) {
+  <div class="aviso-erro" role="alert">
+    <span class="icone">error</span>{{ mensagem }}
+    <button (click)="erro.set(null)" aria-label="Fechar"><span class="icone">close</span></button>
+  </div>
+}
+
+<form class="novo-cartao" (ngSubmit)="adicionar(campoFrente)">
+  <label>
+    <span>Frente</span>
+    <textarea
+      #campoFrente
+      class="campo"
+      name="frente"
+      rows="3"
+      placeholder="A pergunta (ex.: O que é um grafo bipartido?)"
+      [(ngModel)]="frente"
+      (keydown)="atalho($event, campoFrente)"
+    ></textarea>
+  </label>
+  <label>
+    <span>Verso</span>
+    <textarea
+      class="campo"
+      name="verso"
+      rows="3"
+      placeholder="A resposta"
+      [(ngModel)]="verso"
+      (keydown)="atalho($event, campoFrente)"
+    ></textarea>
+  </label>
+  <div class="enviar">
+    <small>Ctrl + Enter adiciona</small>
+    <button type="submit" class="botao" [disabled]="!frente.trim() || !verso.trim()">
+      <span class="icone">add</span>Adicionar cartão
+    </button>
+  </div>
+</form>
+
+<ul class="cartoes">
+  @for (c of lista(); track c.id) {
+    <li>
+      @if (editandoCartao() === c.id) {
+        <form class="edicao-cartao" (ngSubmit)="salvarCartao(c)">
+          <textarea class="campo" name="frente" rows="2" [(ngModel)]="rascunhoCartao.frente"></textarea>
+          <textarea class="campo" name="verso" rows="2" [(ngModel)]="rascunhoCartao.verso"></textarea>
+          <div class="enviar">
+            <button type="button" class="botao secundario" (click)="editandoCartao.set(null)">Cancelar</button>
+            <button type="submit" class="botao">Salvar</button>
+          </div>
+        </form>
+      } @else {
+        <div class="faces">
+          <p class="frente">{{ c.frente }}</p>
+          <p class="verso">{{ c.verso }}</p>
+        </div>
+        <span class="volta" [class.hoje]="c.proximaRevisao <= hoje">
+          <span class="icone">schedule</span>{{ quandoVolta(c) }}
+        </span>
+        <div class="acoes-cartao">
+          <button class="botao-icone" (click)="editarCartao(c)" aria-label="Editar"><span class="icone">edit</span></button>
+          <button class="botao-icone perigo" (click)="removerCartao(c)" aria-label="Apagar">
+            <span class="icone">delete</span>
+          </button>
+        </div>
+      }
+    </li>
+  } @empty {
+    @if (!cartoes.isLoading()) {
+      <p class="vazio">Nenhum cartão ainda. Adicione o primeiro acima.</p>
+    }
+  }
+</ul>

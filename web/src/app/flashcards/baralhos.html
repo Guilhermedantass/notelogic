@@ -1,0 +1,67 @@
+<header class="cabecalho">
+  <div>
+    <h1 class="titulo-pagina">Flashcards</h1>
+    <p class="subtitulo-pagina">
+      @if (totalParaHoje() > 0) {
+        {{ totalParaHoje() }} {{ totalParaHoje() === 1 ? 'cartão espera' : 'cartões esperam' }} por você hoje
+      } @else {
+        Revisão espaçada: cada cartão volta no momento certo de ser lembrado.
+      }
+    </p>
+  </div>
+  @if (!criando()) {
+    <button class="botao" (click)="criando.set(true)"><span class="icone">add</span>Novo baralho</button>
+  }
+</header>
+
+@if (erro() ?? (baralhos.error() ? 'Não foi possível carregar os baralhos.' : null); as mensagem) {
+  <div class="aviso-erro" role="alert">
+    <span class="icone">error</span>{{ mensagem }}
+    <button (click)="erro.set(null)" aria-label="Fechar"><span class="icone">close</span></button>
+  </div>
+}
+
+@if (criando()) {
+  <form class="novo" (ngSubmit)="criar()">
+    <input class="campo" name="nome" placeholder="Nome do baralho (ex.: Inglês — vocabulário)" [(ngModel)]="nome" autofocus />
+    <select class="campo" name="materia" [(ngModel)]="materiaId">
+      <option [ngValue]="null">Sem matéria</option>
+      @for (m of listaMaterias(); track m.id) {
+        <option [ngValue]="m.id">{{ m.nome }}</option>
+      }
+    </select>
+    <button type="button" class="botao secundario" (click)="criando.set(false)">Cancelar</button>
+    <button type="submit" class="botao">Criar</button>
+  </form>
+}
+
+<div class="grade">
+  @for (b of lista(); track b.id) {
+    <article class="baralho" [style.--cor]="b.materia?.cor ?? 'var(--violeta)'">
+      <a [routerLink]="['/flashcards', b.id]" class="topo">
+        @if (b.materia; as m) {
+          <span class="etiqueta">{{ m.nome }}</span>
+        }
+        <h2>{{ b.nome }}</h2>
+        <p class="total">{{ b.totalCartoes }} {{ b.totalCartoes === 1 ? 'cartão' : 'cartões' }}</p>
+      </a>
+      <div class="rodape">
+        @if (b.paraRevisarHoje > 0) {
+          <span class="pendentes">{{ b.paraRevisarHoje }} para hoje</span>
+          <a [routerLink]="['/flashcards', b.id, 'estudo']" class="botao estudar">
+            <span class="icone">play_arrow</span>Estudar
+          </a>
+        } @else {
+          <span class="em-dia"><span class="icone">check_circle</span>Em dia</span>
+        }
+      </div>
+    </article>
+  } @empty {
+    @if (!baralhos.isLoading()) {
+      <div class="vazio">
+        <span class="icone">style</span>
+        <p>Nenhum baralho ainda. Crie o primeiro e adicione cartões com pergunta e resposta.</p>
+      </div>
+    }
+  }
+</div>

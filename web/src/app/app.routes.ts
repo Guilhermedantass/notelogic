@@ -16,14 +16,22 @@ export const routes: Routes = [
   {
     path: 'flashcards',
     title: 'Flashcards · NoteLogic',
-    data: { titulo: 'Flashcards', icone: 'style' },
-    loadComponent: () => import('./shared/em-breve').then((m) => m.EmBreve),
+    loadComponent: () => import('./flashcards/baralhos').then((m) => m.Baralhos),
+  },
+  {
+    path: 'flashcards/:id',
+    title: 'Baralho · NoteLogic',
+    loadComponent: () => import('./flashcards/baralho').then((m) => m.Baralho),
+  },
+  {
+    path: 'flashcards/:id/estudo',
+    title: 'Estudando · NoteLogic',
+    loadComponent: () => import('./flashcards/estudo').then((m) => m.Estudo),
   },
   {
     path: 'pomodoro',
     title: 'Pomodoro · NoteLogic',
-    data: { titulo: 'Pomodoro', icone: 'timer' },
-    loadComponent: () => import('./shared/em-breve').then((m) => m.EmBreve),
+    loadComponent: () => import('./pomodoro/pomodoro').then((m) => m.Pomodoro),
   },
   {
     path: 'painel',

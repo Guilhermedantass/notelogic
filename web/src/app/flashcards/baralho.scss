@@ -1,0 +1,174 @@
+.voltar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  color: var(--texto-suave);
+
+  &:hover {
+    color: var(--texto);
+  }
+}
+
+.cabecalho {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 28px;
+
+  .etiqueta {
+    margin-bottom: 6px;
+  }
+}
+
+.acoes {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.edicao-baralho {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  input {
+    flex: 1;
+    min-width: 220px;
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+}
+
+.novo-cartao {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  max-width: 900px;
+  padding: 18px;
+  border-radius: var(--raio);
+  background: var(--superficie);
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    span {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--texto-suave);
+    }
+  }
+
+  textarea {
+    resize: vertical;
+  }
+
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.enviar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+
+  small {
+    color: var(--texto-suave);
+  }
+
+  .botao:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+}
+
+.cartoes {
+  list-style: none;
+  max-width: 900px;
+  margin-top: 24px;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 6px;
+    border-bottom: 1px solid var(--borda);
+
+    &:hover .acoes-cartao {
+      opacity: 1;
+    }
+  }
+}
+
+.faces {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  min-width: 0;
+
+  p {
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+  }
+}
+
+.frente {
+  font-weight: 600;
+}
+
+.verso {
+  color: var(--texto-suave);
+}
+
+.volta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--texto-suave);
+
+  .icone {
+    font-size: 16px;
+  }
+
+  &.hoje {
+    color: var(--violeta-texto);
+  }
+}
+
+.acoes-cartao {
+  display: flex;
+  opacity: 0;
+  transition: opacity 0.15s;
+
+  @media (hover: none) {
+    opacity: 1;
+  }
+}
+
+.edicao-cartao {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.vazio {
+  padding: 16px 6px;
+  color: var(--texto-suave);
+}
