@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 import dev.guilherme.notelogic.materia.Materia;
+import dev.guilherme.notelogic.recorrencia.Recorrencia;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -53,6 +54,17 @@ public class Tarefa {
     @Column(nullable = false, length = 10)
     private Prioridade prioridade;
 
+    /** Se esta tarefa é a ocorrência de uma tarefa que se repete, a regra e o dia dela. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recorrencia_id")
+    private Recorrencia recorrencia;
+
+    private LocalDate dataOcorrencia;
+
+    /** Ocorrência que passou do dia sem ser feita (regras "expira"): some das listas, fica no histórico. */
+    @Column(nullable = false)
+    private boolean expirada;
+
     protected Tarefa() {
         // exigido pelo JPA
     }
@@ -63,6 +75,15 @@ public class Tarefa {
         this.criadaEm = Instant.now();
         this.concluida = false;
         editar(titulo, descricao, materia, prazo, prioridade);
+    }
+
+    /** A tarefa do dia {@code data} de uma regra que se repete: copia o molde da regra. */
+    public static Tarefa ocorrencia(Recorrencia regra, LocalDate data) {
+        Tarefa t = new Tarefa(regra.getUsuarioId(), regra.getTitulo(), regra.getDescricao(), regra.getMateria(), data,
+                regra.getPrioridade());
+        t.recorrencia = regra;
+        t.dataOcorrencia = data;
+        return t;
     }
 
     public void editar(String titulo, String descricao, Materia materia, LocalDate prazo, Prioridade prioridade) {
@@ -85,6 +106,14 @@ public class Tarefa {
 
     public Long getId() {
         return id;
+    }
+
+    public Recorrencia getRecorrencia() {
+        return recorrencia;
+    }
+
+    public LocalDate getDataOcorrencia() {
+        return dataOcorrencia;
     }
 
     public Long getUsuarioId() {
