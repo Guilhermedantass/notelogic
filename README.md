@@ -35,6 +35,8 @@ API em **Java 25 + Spring Boot 4**, front em **Angular 22**, banco **PostgreSQL*
 - **Contas:** cadastro e login com JWT; cada pessoa só enxerga os próprios dados.
 - **Tema claro e escuro**, escolhido na barra lateral.
 
+O que vem pela frente, as decisões de produto e as ideias em discussão estão no **[roadmap](docs/ROADMAP.md)**.
+
 ## Arquitetura
 
 ```mermaid
