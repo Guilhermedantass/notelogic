@@ -1,0 +1,98 @@
+.cabecalho {
+  margin-bottom: 28px;
+}
+
+.nova {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  max-width: 760px;
+  padding: 16px;
+  border-radius: var(--raio);
+  background: var(--superficie);
+
+  > .campo {
+    flex: 1;
+    min-width: 200px;
+  }
+}
+
+.paleta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  input[type='color'] {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: none;
+    cursor: pointer;
+  }
+}
+
+.cor {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  transition: transform 0.15s;
+
+  &.escolhida {
+    outline: 2px solid var(--texto);
+    outline-offset: 2px;
+  }
+
+  &:hover {
+    transform: scale(1.15);
+  }
+}
+
+.lista {
+  list-style: none;
+  max-width: 760px;
+  margin-top: 24px;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 8px;
+    border-bottom: 1px solid var(--borda);
+  }
+}
+
+.faixa {
+  width: 6px;
+  height: 28px;
+  border-radius: 3px;
+  background: var(--cor);
+}
+
+.nome {
+  flex: 1;
+  font-weight: 600;
+}
+
+.edicao {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+
+  .campo {
+    flex: 1;
+  }
+
+  input[type='color'] {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: none;
+  }
+}
+
+.vazio {
+  padding: 16px 8px;
+  color: var(--texto-suave);
+}

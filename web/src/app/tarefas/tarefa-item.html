@@ -1,0 +1,72 @@
+@let t = tarefa();
+
+@if (!editando()) {
+  <div class="tarefa" [class.feita]="t.concluida">
+    <button
+      class="check"
+      (click)="alternar()"
+      [attr.aria-label]="t.concluida ? 'Reabrir tarefa' : 'Concluir tarefa'"
+    >
+      <span class="icone">check</span>
+    </button>
+
+    <div class="corpo" (dblclick)="abrirEdicao()">
+      <span class="titulo">
+        @if (t.prioridade === 'ALTA') {
+          <span class="icone prioridade" title="Prioridade alta">priority_high</span>
+        }
+        {{ t.titulo }}
+      </span>
+      @if (t.descricao) {
+        <span class="descricao">{{ t.descricao }}</span>
+      }
+      <div class="meta">
+        @if (prazo(); as p) {
+          <span class="prazo" [class.atrasada]="p.atrasada">
+            <span class="icone">event</span>{{ p.rotulo }}
+          </span>
+        }
+        @if (t.materia; as m) {
+          <span class="etiqueta" [style.--cor]="m.cor">{{ m.nome }}</span>
+        }
+      </div>
+    </div>
+
+    <div class="acoes">
+      <button class="botao-icone" (click)="abrirEdicao()" aria-label="Editar">
+        <span class="icone">edit</span>
+      </button>
+      <button class="botao-icone perigo" (click)="remover.emit(t)" aria-label="Apagar">
+        <span class="icone">delete</span>
+      </button>
+    </div>
+  </div>
+} @else {
+  <form class="edicao" (ngSubmit)="confirmarEdicao()">
+    <input class="campo titulo-edicao" name="titulo" [(ngModel)]="rascunho.titulo" required autofocus />
+    <textarea
+      class="campo"
+      name="descricao"
+      rows="2"
+      placeholder="Descrição (opcional)"
+      [(ngModel)]="rascunho.descricao"
+    ></textarea>
+    <div class="linha">
+      <select class="campo" name="materia" [(ngModel)]="rascunho.materiaId">
+        <option [ngValue]="null">Sem matéria</option>
+        @for (m of materias(); track m.id) {
+          <option [ngValue]="m.id">{{ m.nome }}</option>
+        }
+      </select>
+      <input class="campo" type="date" name="prazo" [(ngModel)]="rascunho.prazo" />
+      <select class="campo" name="prioridade" [(ngModel)]="rascunho.prioridade">
+        @for (p of prioridades; track p.valor) {
+          <option [ngValue]="p.valor">{{ p.rotulo }}</option>
+        }
+      </select>
+      <span class="espaco"></span>
+      <button type="button" class="botao secundario" (click)="editando.set(false)">Cancelar</button>
+      <button type="submit" class="botao">Salvar</button>
+    </div>
+  </form>
+}

@@ -1,0 +1,55 @@
+<header class="cabecalho">
+  <h1 class="titulo-pagina">Matérias</h1>
+  <p class="subtitulo-pagina">Organizam tarefas, baralhos e o tempo de foco.</p>
+</header>
+
+@if (erro(); as mensagem) {
+  <div class="aviso-erro" role="alert">
+    <span class="icone">error</span>{{ mensagem }}
+    <button (click)="erro.set(null)" aria-label="Fechar"><span class="icone">close</span></button>
+  </div>
+}
+
+<form class="nova" (ngSubmit)="criar()">
+  <input class="campo" name="nome" placeholder="Nova matéria (ex.: Grafos)" [(ngModel)]="nova.nome" />
+  <div class="paleta">
+    @for (cor of paleta; track cor) {
+      <button
+        type="button"
+        class="cor"
+        [class.escolhida]="nova.cor === cor"
+        [style.background]="cor"
+        (click)="nova.cor = cor"
+        [attr.aria-label]="'Cor ' + cor"
+      ></button>
+    }
+    <input type="color" name="cor" [(ngModel)]="nova.cor" aria-label="Outra cor" />
+  </div>
+  <button type="submit" class="botao"><span class="icone">add</span>Criar</button>
+</form>
+
+<ul class="lista">
+  @for (m of lista(); track m.id) {
+    <li [style.--cor]="m.cor">
+      @if (editandoId() === m.id) {
+        <form class="edicao" (ngSubmit)="salvar(m)">
+          <input type="color" name="cor" [(ngModel)]="rascunho.cor" aria-label="Cor" />
+          <input class="campo" name="nome" [(ngModel)]="rascunho.nome" autofocus />
+          <button type="button" class="botao secundario" (click)="editandoId.set(null)">Cancelar</button>
+          <button type="submit" class="botao">Salvar</button>
+        </form>
+      } @else {
+        <span class="faixa"></span>
+        <span class="nome">{{ m.nome }}</span>
+        <button class="botao-icone" (click)="editar(m)" aria-label="Editar"><span class="icone">edit</span></button>
+        <button class="botao-icone perigo" (click)="remover(m)" aria-label="Apagar">
+          <span class="icone">delete</span>
+        </button>
+      }
+    </li>
+  } @empty {
+    @if (!materias.isLoading()) {
+      <p class="vazio">Nenhuma matéria ainda. Crie a primeira acima.</p>
+    }
+  }
+</ul>

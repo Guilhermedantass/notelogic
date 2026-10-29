@@ -1,0 +1,93 @@
+<header class="cabecalho">
+  <div>
+    <h1 class="titulo-pagina">Hoje</h1>
+    <p class="subtitulo-pagina">{{ dataExtensa }}</p>
+  </div>
+  @if (listaPendentes().length > 0) {
+    <span class="contador">{{ listaPendentes().length }} pendentes</span>
+  }
+</header>
+
+@if (erro() ?? erroDeCarga(); as mensagem) {
+  <div class="aviso-erro" role="alert">
+    <span class="icone">error</span>{{ mensagem }}
+    @if (erro()) {
+      <button (click)="erro.set(null)" aria-label="Fechar"><span class="icone">close</span></button>
+    }
+  </div>
+}
+
+@if (listaMaterias().length > 0) {
+  <div class="filtros" role="group" aria-label="Filtrar por matéria">
+    <button class="chip" [class.ativo]="materiaFiltro() === null" (click)="materiaFiltro.set(null)">
+      Todas
+    </button>
+    @for (m of listaMaterias(); track m.id) {
+      <button
+        class="chip"
+        [class.ativo]="materiaFiltro() === m.id"
+        [style.--cor]="m.cor"
+        (click)="materiaFiltro.set(m.id)"
+      >
+        <span class="bolinha"></span>{{ m.nome }}
+      </button>
+    }
+  </div>
+}
+
+<div class="grade">
+  <section class="lista">
+    @for (grupo of grupos(); track grupo.chave) {
+      <h2 class="grupo" [class]="grupo.chave">
+        {{ grupo.titulo }} <span>{{ grupo.tarefas.length }}</span>
+      </h2>
+      @for (t of grupo.tarefas; track t.id) {
+        <app-tarefa-item
+          [tarefa]="t"
+          [hoje]="hoje"
+          [materias]="listaMaterias()"
+          (concluir)="concluir($event)"
+          (reabrir)="reabrir($event)"
+          (remover)="remover($event)"
+          (salvar)="salvar($event)"
+        />
+      }
+    } @empty {
+      @if (!pendentes.isLoading() && !erroDeCarga()) {
+        <p class="tudo-feito">
+          <span class="icone">celebration</span>
+          Nada pendente por aqui. Que tal adicionar a próxima?
+        </p>
+      }
+    }
+
+    <app-nova-tarefa
+      [materias]="listaMaterias()"
+      [materiaPadrao]="materiaFiltro()"
+      (criar)="adicionar($event)"
+    />
+
+    <button class="alternar" (click)="mostrarConcluidas.update((v) => !v)">
+      <span class="icone">{{ mostrarConcluidas() ? 'expand_less' : 'expand_more' }}</span>
+      Concluídas
+    </button>
+
+    @if (mostrarConcluidas()) {
+      @for (t of listaConcluidas(); track t.id) {
+        <app-tarefa-item
+          [tarefa]="t"
+          [hoje]="hoje"
+          [materias]="listaMaterias()"
+          (concluir)="concluir($event)"
+          (reabrir)="reabrir($event)"
+          (remover)="remover($event)"
+          (salvar)="salvar($event)"
+        />
+      } @empty {
+        <p class="vazio">Nenhuma tarefa concluída ainda.</p>
+      }
+    }
+  </section>
+
+  <img class="ilustracao" src="img/tarefas.svg" alt="" />
+</div>

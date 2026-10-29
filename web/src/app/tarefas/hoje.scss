@@ -1,0 +1,145 @@
+.cabecalho {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.contador {
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--violeta-suave);
+  color: var(--violeta);
+  font-weight: 700;
+  font-size: 0.85rem;
+
+  @media (prefers-color-scheme: dark) {
+    color: #fff;
+  }
+}
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--borda);
+  font-weight: 500;
+  font-size: 0.85rem;
+  transition: all 0.15s;
+
+  .bolinha {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--cor, var(--violeta));
+  }
+
+  &:hover {
+    border-color: var(--cor, var(--violeta));
+  }
+
+  &.ativo {
+    background: var(--cor, var(--violeta));
+    border-color: var(--cor, var(--violeta));
+    color: #fff;
+
+    .bolinha {
+      background: #fff;
+    }
+  }
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: minmax(0, 680px) minmax(0, 1fr);
+  gap: 48px;
+  align-items: start;
+}
+
+.ilustracao {
+  position: sticky;
+  top: 48px;
+  width: 100%;
+  max-width: 460px;
+  justify-self: center;
+}
+
+@media (max-width: 1100px) {
+  .grade {
+    grid-template-columns: 1fr;
+  }
+
+  .ilustracao {
+    display: none;
+  }
+}
+
+.grupo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 24px 0 4px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--texto-suave);
+
+  &:first-child {
+    margin-top: 0;
+  }
+
+  span {
+    font-weight: 500;
+  }
+
+  &.atrasadas {
+    color: var(--vermelho);
+  }
+
+  &.hoje {
+    color: var(--violeta);
+  }
+}
+
+.tudo-feito {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 4px;
+  color: var(--texto-suave);
+
+  .icone {
+    color: var(--violeta);
+  }
+}
+
+.alternar {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 28px;
+  padding: 6px 0;
+  font-weight: 600;
+  color: var(--texto-suave);
+
+  &:hover {
+    color: var(--texto);
+  }
+}
+
+.vazio {
+  padding: 12px 4px;
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+}
