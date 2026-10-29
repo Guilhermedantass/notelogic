@@ -16,7 +16,7 @@ describe('App', () => {
     await fixture.whenStable();
     const html = fixture.nativeElement as HTMLElement;
 
-    expect(html.querySelector('.marca')?.textContent).toContain('NoteLogic');
+    expect(html.querySelector('.marca')?.textContent).toContain('notelogic');
     expect(html.querySelectorAll('nav a').length).toBe(5);
   });
 });

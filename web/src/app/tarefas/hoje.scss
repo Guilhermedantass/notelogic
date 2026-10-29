@@ -63,6 +63,7 @@
 }
 
 .ilustracao {
+  display: var(--ilustracao, block);
   position: sticky;
   top: 48px;
   width: 100%;
@@ -104,7 +105,7 @@
   }
 
   &.hoje {
-    color: var(--violeta);
+    color: var(--violeta-texto);
   }
 }
 

@@ -2,16 +2,16 @@ import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 import { Tema, TemaService } from '../core/tema.service';
+import { Logo } from './logo';
 
-/** A barra violeta da v1, agora na lateral. No celular ela vira uma barra de abas no rodapé. */
+/** Barra lateral neutra; o violeta aparece só no item ativo. No celular vira uma barra de abas no rodapé. */
 @Component({
   selector: 'app-sidebar',
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, Logo],
   template: `
     <aside class="sidebar">
-      <a routerLink="/hoje" class="marca">
-        <img src="img/logo.png" alt="" width="36" height="36" />
-        <span>Note<strong>Logic</strong></span>
+      <a routerLink="/hoje" class="marca" aria-label="NoteLogic, ir para Hoje">
+        <app-logo />
       </a>
 
       <nav>
@@ -48,57 +48,44 @@ import { Tema, TemaService } from '../core/tema.service';
       position: sticky;
       top: 0;
       height: 100vh;
-      width: 240px;
+      width: 236px;
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
-      gap: 32px;
-      padding: 28px 16px;
-      background: var(--violeta);
-      color: #fff;
+      gap: 28px;
+      padding: 24px 14px;
+      background: var(--lateral);
+      border-right: 1px solid var(--borda);
     }
 
     .marca {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 0 8px;
-      font-size: 1.3rem;
-      font-weight: 500;
-
-      img {
-        border-radius: 8px;
-      }
-
-      strong {
-        font-weight: 800;
-      }
+      padding: 4px 10px;
     }
 
     nav {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 2px;
     }
 
     .item {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 10px 12px;
+      padding: 9px 12px;
       border-radius: 10px;
       font-weight: 500;
-      color: rgb(255 255 255 / 0.75);
+      color: var(--texto-suave);
       transition: background 0.15s, color 0.15s;
 
       &:hover {
-        color: #fff;
-        background: rgb(255 255 255 / 0.1);
+        color: var(--texto);
+        background: var(--superficie);
       }
 
       &.ativo {
-        color: var(--violeta);
-        background: #fff;
+        color: var(--violeta-texto);
+        background: var(--violeta-suave);
         font-weight: 700;
 
         .icone {
@@ -112,7 +99,7 @@ import { Tema, TemaService } from '../core/tema.service';
       display: flex;
       flex-direction: column;
       gap: 12px;
-      padding: 0 8px;
+      padding: 0 6px;
     }
 
     .seletor-tema {
@@ -120,15 +107,16 @@ import { Tema, TemaService } from '../core/tema.service';
       gap: 2px;
       padding: 3px;
       border-radius: 10px;
-      background: rgb(255 255 255 / 0.12);
+      background: var(--superficie);
+      border: 1px solid var(--borda);
 
       button {
         flex: 1;
         display: grid;
         place-items: center;
         padding: 5px 0;
-        border-radius: 8px;
-        color: rgb(255 255 255 / 0.7);
+        border-radius: 7px;
+        color: var(--texto-suave);
         transition: background 0.15s, color 0.15s;
 
         .icone {
@@ -136,19 +124,21 @@ import { Tema, TemaService } from '../core/tema.service';
         }
 
         &:hover {
-          color: #fff;
+          color: var(--texto);
         }
 
         &.ativo {
-          background: #fff;
-          color: var(--violeta);
+          background: var(--fundo);
+          color: var(--violeta-texto);
+          box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
         }
       }
     }
 
     .credito {
       font-size: 0.7rem;
-      color: rgb(255 255 255 / 0.5);
+      color: var(--texto-suave);
+      opacity: 0.7;
     }
 
     @media (max-width: 760px) {
@@ -161,7 +151,9 @@ import { Tema, TemaService } from '../core/tema.service';
         z-index: 10;
         height: auto;
         width: auto;
-        padding: 8px;
+        padding: 6px;
+        border-right: none;
+        border-top: 1px solid var(--borda);
       }
 
       .marca,
@@ -186,17 +178,17 @@ import { Tema, TemaService } from '../core/tema.service';
 export class Sidebar {
   protected readonly temaService = inject(TemaService);
 
-  protected readonly temas: { valor: Tema; icone: string; rotulo: string }[] = [
-    { valor: 'claro', icone: 'light_mode', rotulo: 'Claro' },
-    { valor: 'escuro', icone: 'dark_mode', rotulo: 'Escuro' },
-    { valor: 'sistema', icone: 'contrast', rotulo: 'Seguir o sistema' },
-  ];
-
   protected readonly itens = [
     { rota: '/hoje', icone: 'today', rotulo: 'Hoje' },
     { rota: '/flashcards', icone: 'style', rotulo: 'Flashcards' },
     { rota: '/pomodoro', icone: 'timer', rotulo: 'Pomodoro' },
     { rota: '/painel', icone: 'insights', rotulo: 'Painel' },
     { rota: '/materias', icone: 'palette', rotulo: 'Matérias' },
+  ];
+
+  protected readonly temas: { valor: Tema; icone: string; rotulo: string }[] = [
+    { valor: 'claro', icone: 'light_mode', rotulo: 'Claro' },
+    { valor: 'escuro', icone: 'dark_mode', rotulo: 'Escuro' },
+    { valor: 'sistema', icone: 'contrast', rotulo: 'Seguir o sistema' },
   ];
 }

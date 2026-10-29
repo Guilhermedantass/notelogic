@@ -1,17 +1,20 @@
 // Tema do NoteLogic: o violeta e a Montserrat da v1, organizados em variáveis CSS.
 // Componentes usam só as variáveis, então o modo escuro é só trocar os valores aqui.
 
+// O violeta é cor de DESTAQUE (item ativo, checks, botões), não de bloco.
+// As superfícies grandes são neutras, levemente puxadas para o roxo.
 :root {
   --violeta: #543efe;
-  --violeta-forte: #3f2ae0;
-  --violeta-suave: #eeebff;
-  --violeta-texto: #543efe;
+  --violeta-forte: #4330e0;
+  --violeta-suave: #efedff;
+  --violeta-texto: #4a35ea;
 
   --fundo: #ffffff;
-  --superficie: #f7f7fb;
-  --borda: #e4e4ee;
-  --texto: #1d1b2c;
-  --texto-suave: #6b6880;
+  --lateral: #f8f7fc;
+  --superficie: #f6f5fb;
+  --borda: #e8e6f0;
+  --texto: #1c1a29;
+  --texto-suave: #6e6a85;
 
   --verde: #1f9d55;
   --vermelho: #e5484d;
@@ -23,16 +26,23 @@
   color-scheme: light;
 }
 
-// Valores do modo escuro, num mixin para não repetir nos dois seletores abaixo.
+// Modo escuro: roxo bem escuro em vez de cinza, e um violeta um pouco mais claro para manter o contraste.
 @mixin tema-escuro {
-  --violeta-suave: #2a2560;
-  --violeta-texto: #c9c2ff;
-  --fundo: #12111a;
-  --superficie: #1b1a26;
-  --borda: #2c2a3d;
-  --texto: #ecebf5;
-  --texto-suave: #9b98b3;
-  --sombra: 0 8px 30px rgb(0 0 0 / 0.4);
+  --violeta: #6f5cff;
+  --violeta-forte: #8373ff;
+  --violeta-suave: #251f4a;
+  --violeta-texto: #c3baff;
+
+  --fundo: #0f0c1d;
+  --lateral: #0b0916;
+  --superficie: #18142c;
+  --borda: #272143;
+  --texto: #eceaf7;
+  --texto-suave: #9d97bd;
+
+  --sombra: 0 8px 30px rgb(0 0 0 / 0.45);
+  // as ilustrações da Storyset foram feitas para fundo branco: no escuro ficam escondidas
+  --ilustracao: none;
   color-scheme: dark;
 }
 
@@ -101,7 +111,7 @@ button {
 .titulo-pagina {
   font-size: 2rem;
   font-weight: 800;
-  color: var(--violeta);
+  color: var(--violeta-texto);
   letter-spacing: -0.02em;
 }
 
