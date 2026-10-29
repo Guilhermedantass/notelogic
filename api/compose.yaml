@@ -1,0 +1,18 @@
+# Banco de desenvolvimento. Não precisa subir na mão: ao rodar ./mvnw spring-boot:run,
+# o Spring Boot (dependência spring-boot-docker-compose) sobe este arquivo e se conecta sozinho.
+name: notelogic
+
+services:
+  postgres:
+    image: 'postgres:18'
+    environment:
+      POSTGRES_DB: notelogic
+      POSTGRES_USER: notelogic
+      POSTGRES_PASSWORD: notelogic
+    ports:
+      - '5432'   # porta do host escolhida pelo Docker, para não brigar com outros Postgres (ex.: o do IDS)
+    volumes:
+      - notelogic-pgdata:/var/lib/postgresql
+
+volumes:
+  notelogic-pgdata:

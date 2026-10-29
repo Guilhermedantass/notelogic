@@ -1,43 +1,49 @@
 package dev.guilherme.notelogic.tarefa;
 
-import java.time.Instant;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TarefaService {
 
-    private final Map<Long, Tarefa> tarefas = new ConcurrentHashMap<>();
-    private final AtomicLong proximoId = new AtomicLong(1);
+    private final TarefaRepository repository;
 
+    public TarefaService(TarefaRepository repository) {
+        this.repository = repository;
+    }
+
+    @Transactional(readOnly = true)
     public List<Tarefa> listar() {
-        return tarefas.values().stream()
-                .sorted(Comparator.comparing(Tarefa::id))
-                .toList();
+        return repository.findAllByOrderByIdAsc();
     }
 
+    @Transactional(readOnly = true)
     public Optional<Tarefa> buscar(Long id) {
-        return Optional.ofNullable(tarefas.get(id));
+        return repository.findById(id);
     }
 
+    @Transactional
     public Tarefa criar(String titulo, String descricao) {
-        Long id = proximoId.getAndIncrement();
-        Tarefa tarefa = new Tarefa(id, titulo, descricao, false, Instant.now());
-        tarefas.put(id, tarefa);
-        return tarefa;
+        return repository.save(new Tarefa(titulo, descricao));
     }
 
+    @Transactional
     public Optional<Tarefa> concluir(Long id) {
-        return Optional.ofNullable(tarefas.computeIfPresent(id, (chave, tarefa) -> tarefa.concluir()));
+        return repository.findById(id).map(tarefa -> {
+            tarefa.concluir(); // sem save: o Hibernate percebe a mudança e faz o UPDATE no fim da transação
+            return tarefa;
+        });
     }
 
+    @Transactional
     public boolean remover(Long id) {
-        return tarefas.remove(id) != null;
+        if (!repository.existsById(id)) {
+            return false;
+        }
+        repository.deleteById(id);
+        return true;
     }
 }
