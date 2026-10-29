@@ -8,11 +8,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/tarefas")
@@ -25,35 +27,39 @@ public class TarefaController {
     }
 
     @GetMapping
-    public List<Tarefa> listar() {
-        return service.listar();
+    public List<TarefaResponse> listar() {
+        return service.listar().stream().map(TarefaResponse::de).toList();
     }
 
     @GetMapping("/{id}")
-    public Tarefa buscar(@PathVariable Long id) {
-        return service.buscar(id).orElseThrow(this::naoEncontrada);
+    public TarefaResponse buscar(@PathVariable Long id) {
+        return TarefaResponse.de(service.buscar(id));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Tarefa criar(@RequestBody NovaTarefaRequest request) {
-        return service.criar(request.titulo(), request.descricao());
+    public TarefaResponse criar(@Valid @RequestBody TarefaRequest request) {
+        return TarefaResponse.de(service.criar(request.titulo(), request.descricao()));
+    }
+
+    @PutMapping("/{id}")
+    public TarefaResponse editar(@PathVariable Long id, @Valid @RequestBody TarefaRequest request) {
+        return TarefaResponse.de(service.editar(id, request.titulo(), request.descricao()));
     }
 
     @PatchMapping("/{id}/concluir")
-    public Tarefa concluir(@PathVariable Long id) {
-        return service.concluir(id).orElseThrow(this::naoEncontrada);
+    public TarefaResponse concluir(@PathVariable Long id) {
+        return TarefaResponse.de(service.concluir(id));
+    }
+
+    @PatchMapping("/{id}/reabrir")
+    public TarefaResponse reabrir(@PathVariable Long id) {
+        return TarefaResponse.de(service.reabrir(id));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void remover(@PathVariable Long id) {
-        if (!service.remover(id)) {
-            throw naoEncontrada();
-        }
-    }
-
-    private ResponseStatusException naoEncontrada() {
-        return new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada");
+        service.remover(id);
     }
 }

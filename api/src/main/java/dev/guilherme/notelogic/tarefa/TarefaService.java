@@ -1,10 +1,11 @@
 package dev.guilherme.notelogic.tarefa;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import dev.guilherme.notelogic.erro.RecursoNaoEncontradoException;
 
 @Service
 public class TarefaService {
@@ -21,8 +22,8 @@ public class TarefaService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<Tarefa> buscar(Long id) {
-        return repository.findById(id);
+    public Tarefa buscar(Long id) {
+        return repository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Tarefa", id));
     }
 
     @Transactional
@@ -31,19 +32,28 @@ public class TarefaService {
     }
 
     @Transactional
-    public Optional<Tarefa> concluir(Long id) {
-        return repository.findById(id).map(tarefa -> {
-            tarefa.concluir(); // sem save: o Hibernate percebe a mudança e faz o UPDATE no fim da transação
-            return tarefa;
-        });
+    public Tarefa editar(Long id, String titulo, String descricao) {
+        Tarefa tarefa = buscar(id);
+        tarefa.editar(titulo, descricao);
+        return tarefa;
     }
 
     @Transactional
-    public boolean remover(Long id) {
-        if (!repository.existsById(id)) {
-            return false;
-        }
-        repository.deleteById(id);
-        return true;
+    public Tarefa concluir(Long id) {
+        Tarefa tarefa = buscar(id);
+        tarefa.concluir(); // sem save: o Hibernate percebe a mudança e faz o UPDATE no fim da transação
+        return tarefa;
+    }
+
+    @Transactional
+    public Tarefa reabrir(Long id) {
+        Tarefa tarefa = buscar(id);
+        tarefa.reabrir();
+        return tarefa;
+    }
+
+    @Transactional
+    public void remover(Long id) {
+        repository.delete(buscar(id));
     }
 }

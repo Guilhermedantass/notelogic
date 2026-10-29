@@ -38,8 +38,17 @@ public class Tarefa {
         this.criadaEm = Instant.now();
     }
 
+    public void editar(String titulo, String descricao) {
+        this.titulo = titulo;
+        this.descricao = descricao;
+    }
+
     public void concluir() {
         this.concluida = true;
+    }
+
+    public void reabrir() {
+        this.concluida = false;
     }
 
     public Long getId() {
