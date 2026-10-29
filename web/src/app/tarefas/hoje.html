@@ -46,6 +46,7 @@
           [tarefa]="t"
           [hoje]="hoje"
           [materias]="listaMaterias()"
+          [constancia]="constanciaDe(t)"
           (concluir)="concluir($event)"
           (reabrir)="reabrir($event)"
           (remover)="remover($event)"
@@ -65,6 +66,7 @@
       [materias]="listaMaterias()"
       [materiaPadrao]="materiaFiltro()"
       (criar)="adicionar($event)"
+      (criarRecorrente)="adicionarRecorrente($event)"
     />
 
     <button class="alternar" (click)="mostrarConcluidas.update((v) => !v)">
@@ -78,6 +80,7 @@
           [tarefa]="t"
           [hoje]="hoje"
           [materias]="listaMaterias()"
+          [constancia]="constanciaDe(t)"
           (concluir)="concluir($event)"
           (reabrir)="reabrir($event)"
           (remover)="remover($event)"

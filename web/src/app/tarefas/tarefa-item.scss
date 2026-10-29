@@ -130,6 +130,54 @@
   gap: 8px;
 }
 
-.espaco {
-  flex: 1;
+// os botões ficam juntos, à direita; se não couberem, descem juntos para a linha de baixo
+.botoes {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.repete {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  color: var(--violeta-texto);
+
+  .icone {
+    font-size: 16px;
+  }
+}
+
+.constancia {
+  font-weight: 500;
+  color: var(--texto-suave);
+}
+
+// a pergunta "só esta ou as próximas?" aparece na própria linha
+.escopo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  margin-bottom: 4px;
+  border-radius: 10px;
+  background: var(--superficie);
+  font-size: 0.85rem;
+
+  span {
+    margin-right: auto;
+    color: var(--texto-suave);
+  }
+
+  .perigo-forte {
+    background: var(--vermelho);
+
+    &:hover {
+      background: var(--vermelho);
+      filter: brightness(1.1);
+      box-shadow: none;
+    }
+  }
 }

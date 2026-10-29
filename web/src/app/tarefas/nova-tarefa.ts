@@ -1,91 +1,31 @@
 import { Component, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { Materia, Prioridade, TarefaRequest } from '../core/api.models';
+import { DiaDaSemana, Materia, Prioridade, RecorrenciaRequest, TarefaRequest, TipoRecorrencia } from '../core/api.models';
 import { hojeIso } from '../core/datas';
 
-/** O "Add task" da v1: um campo no fim da lista. Enter cria; os detalhes aparecem quando você começa a digitar. */
+type Repetir = 'NAO' | TipoRecorrencia;
+
+/** Domingo primeiro, como no calendário brasileiro. getDay() do JS também começa no domingo (0). */
+const DIAS: { valor: DiaDaSemana; letra: string; nome: string }[] = [
+  { valor: 'SUNDAY', letra: 'D', nome: 'domingo' },
+  { valor: 'MONDAY', letra: 'S', nome: 'segunda' },
+  { valor: 'TUESDAY', letra: 'T', nome: 'terça' },
+  { valor: 'WEDNESDAY', letra: 'Q', nome: 'quarta' },
+  { valor: 'THURSDAY', letra: 'Q', nome: 'quinta' },
+  { valor: 'FRIDAY', letra: 'S', nome: 'sexta' },
+  { valor: 'SATURDAY', letra: 'S', nome: 'sábado' },
+];
+
+/**
+ * O "Add task" da v1: um campo no fim da lista. Enter cria; os detalhes aparecem quando você começa a digitar.
+ * Com "Repetir", em vez de uma tarefa cria uma REGRA (e a API gera a tarefa de cada dia).
+ */
 @Component({
   selector: 'app-nova-tarefa',
   imports: [FormsModule],
-  template: `
-    <form class="nova" [class.aberta]="titulo().length > 0" (ngSubmit)="enviar()">
-      <div class="principal">
-        <span class="icone">add</span>
-        <input
-          name="titulo"
-          placeholder="Adicionar tarefa"
-          autocomplete="off"
-          [ngModel]="titulo()"
-          (ngModelChange)="titulo.set($event)"
-        />
-      </div>
-
-      @if (titulo().length > 0) {
-        <div class="detalhes">
-          <select class="campo" name="materia" [(ngModel)]="materiaId">
-            <option [ngValue]="null">Sem matéria</option>
-            @for (m of materias(); track m.id) {
-              <option [ngValue]="m.id">{{ m.nome }}</option>
-            }
-          </select>
-          <input class="campo" type="date" name="prazo" [(ngModel)]="prazo" />
-          <button type="button" class="campo" (click)="prazo = hoje">Hoje</button>
-          <select class="campo" name="prioridade" [(ngModel)]="prioridade">
-            <option ngValue="BAIXA">Prioridade baixa</option>
-            <option ngValue="MEDIA">Prioridade média</option>
-            <option ngValue="ALTA">Prioridade alta</option>
-          </select>
-          <button type="submit" class="botao">Adicionar</button>
-        </div>
-      }
-    </form>
-  `,
-  styles: `
-    .nova {
-      border-bottom: 1px solid var(--borda);
-      transition: background 0.15s;
-
-      &.aberta {
-        background: var(--superficie);
-        border-radius: var(--raio);
-        border-bottom-color: transparent;
-        margin-top: 8px;
-      }
-    }
-
-    .principal {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 4px;
-      color: var(--violeta);
-
-      input {
-        flex: 1;
-        border: none;
-        outline: none;
-        background: transparent;
-        color: var(--texto);
-        font-size: 1rem;
-
-        &::placeholder {
-          color: var(--texto-suave);
-        }
-      }
-    }
-
-    .aberta .principal {
-      padding: 12px 14px;
-    }
-
-    .detalhes {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      padding: 0 14px 14px 46px;
-    }
-  `,
+  templateUrl: './nova-tarefa.html',
+  styleUrl: './nova-tarefa.scss',
 })
 export class NovaTarefa {
   readonly materias = input<Materia[]>([]);
@@ -93,25 +33,61 @@ export class NovaTarefa {
   readonly materiaPadrao = input<number | null>(null);
 
   readonly criar = output<TarefaRequest>();
+  readonly criarRecorrente = output<RecorrenciaRequest>();
 
+  protected readonly dias = DIAS;
   protected readonly titulo = signal('');
   protected readonly hoje = hojeIso();
   protected materiaId: number | null = null;
   protected prazo: string | null = null;
   protected prioridade: Prioridade = 'MEDIA';
 
+  // ---- repetição ----
+  protected readonly repetir = signal<Repetir>('NAO');
+  protected readonly diasSemana = signal<DiaDaSemana[]>([DIAS[new Date().getDay()].valor]);
+  protected intervaloDias = 2;
+  protected diaDoMes = new Date().getDate();
+  protected acumula = false;
+
+  protected alternarDia(dia: DiaDaSemana): void {
+    this.diasSemana.update((atual) =>
+      atual.includes(dia) ? atual.filter((d) => d !== dia) : [...atual, dia],
+    );
+  }
+
   protected enviar(): void {
     const titulo = this.titulo().trim();
     if (!titulo) return;
-    this.criar.emit({
-      titulo,
-      materiaId: this.materiaId ?? this.materiaPadrao(),
-      prazo: this.prazo || null,
-      prioridade: this.prioridade,
-    });
+    const materiaId = this.materiaId ?? this.materiaPadrao();
+
+    const tipo = this.repetir();
+    if (tipo === 'NAO') {
+      this.criar.emit({ titulo, materiaId, prazo: this.prazo || null, prioridade: this.prioridade });
+    } else {
+      if (tipo === 'SEMANAL' && this.diasSemana().length === 0) return;
+      this.criarRecorrente.emit({
+        titulo,
+        materiaId,
+        prioridade: this.prioridade,
+        acumula: this.acumula,
+        regra: {
+          tipo,
+          inicio: this.prazo || this.hoje, // com repetição, a data do campo vira "a partir de"
+          diasSemana: tipo === 'SEMANAL' ? this.diasSemana() : undefined,
+          intervaloDias: tipo === 'A_CADA_N_DIAS' ? this.intervaloDias : undefined,
+          diaDoMes: tipo === 'MENSAL' ? this.diaDoMes : undefined,
+        },
+      });
+    }
+    this.limpar();
+  }
+
+  private limpar(): void {
     this.titulo.set('');
     this.materiaId = null;
     this.prazo = null;
     this.prioridade = 'MEDIA';
+    this.repetir.set('NAO');
+    this.acumula = false;
   }
 }

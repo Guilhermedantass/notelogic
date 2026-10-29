@@ -24,6 +24,9 @@ export interface Tarefa {
   materia: Materia | null;
   prazo: string | null;
   prioridade: Prioridade;
+  /** Preenchido quando a tarefa é a ocorrência de uma tarefa que se repete. */
+  recorrencia: { id: number; descricao: string; acumula: boolean } | null;
+  dataOcorrencia: string | null;
 }
 
 export interface TarefaRequest {
@@ -122,3 +125,44 @@ export interface Estatisticas {
   dias: DiaEstatistica[];
   focoPorMateria: { materia: Materia; minutos: number }[];
 }
+
+// ---- Tarefas recorrentes ----
+
+export type TipoRecorrencia = 'DIARIA' | 'DIAS_UTEIS' | 'SEMANAL' | 'A_CADA_N_DIAS' | 'MENSAL';
+export type DiaDaSemana = 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY' | 'SATURDAY' | 'SUNDAY';
+
+export interface Regra {
+  tipo: TipoRecorrencia;
+  diasSemana?: DiaDaSemana[];
+  intervaloDias?: number | null;
+  diaDoMes?: number | null;
+  inicio?: string | null;
+  fim?: string | null;
+  maxOcorrencias?: number | null;
+}
+
+export interface RecorrenciaRequest {
+  titulo: string;
+  descricao?: string | null;
+  materiaId?: number | null;
+  prioridade?: Prioridade;
+  regra: Regra;
+  acumula: boolean;
+}
+
+export interface Recorrencia {
+  id: number;
+  titulo: string;
+  descricao: string | null;
+  materia: Materia | null;
+  prioridade: Prioridade;
+  regra: Regra;
+  resumo: string;
+  acumula: boolean;
+  encerrada: boolean;
+  feitas: number;
+  esperadas: number;
+}
+
+/** "Só esta" ou "esta e as próximas", nas ações de uma tarefa que se repete. */
+export type Escopo = 'so-esta' | 'proximas';

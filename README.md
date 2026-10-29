@@ -23,6 +23,9 @@ API em **Java 25 + Spring Boot 4**, front em **Angular 22**, banco **PostgreSQL*
 ## O que ele faz
 
 - **Tarefas:** prazo, prioridade e matéria; a tela "Hoje" agrupa em atrasadas, para hoje, próximas e sem prazo.
+- **Tarefas que se repetem:** todo dia, dias úteis, dias da semana escolhidos, a cada N dias ou todo mês. Cada uma
+  escolhe se, quando não é feita no dia, **expira** ou **vira atrasada**; editar e apagar perguntam "só esta" ou
+  "esta e as próximas", e a lista mostra a constância ("18/20").
 - **Flashcards com SM-2:** o algoritmo de repetição espaçada que é a base do Anki. Você responde *Errei / Difícil /
   Bom / Fácil* e o cartão volta no momento certo de ser lembrado; cada botão já mostra quando ("1 dia", "6 dias").
   Cartão vira em 3D e dá para estudar só pelo teclado.
@@ -52,6 +55,7 @@ A API é organizada **por funcionalidade** (`tarefa/`, `materia/`, `flashcard/`,
 | Onde | O quê |
 |---|---|
 | `api/.../flashcard/AgendadorSm2.java` | SM-2 como **lógica pura** (sem Spring nem banco), testado com JUnit puro. O front tem uma cópia só para *prever* os intervalos, testada com **os mesmos casos** do Java. |
+| `api/.../recorrencia/` | A regra de repetição é guardada, e cada dia vira uma tarefa comum **sob demanda** (ao listar), sem job à meia-noite. O calendário é lógica pura testada com casos de borda (dia 31 em fevereiro, ano bissexto); uma trava pessimista e um índice único impedem ocorrências duplicadas. |
 | `api/.../config/Relogio.java` | O "agora" é um `Clock` injetado. Os testes controlam o tempo e provam, por exemplo, que 23h30 de domingo em São Paulo conta como domingo. |
 | `api/.../pomodoro/SessaoFoco.java` + `V4__*.sql` | A entidade é uma máquina de estados; um **índice único parcial** no Postgres garante uma sessão em andamento por usuário, mesmo com duas requisições simultâneas. |
 | `api/.../estatistica/EstatisticaConsultas.java` | As agregações saem do JPA para **SQL com `JdbcClient`**: agrupar por dia no fuso do usuário é trabalho do banco. |
@@ -62,7 +66,7 @@ A API é organizada **por funcionalidade** (`tarefa/`, `materia/`, `flashcard/`,
 
 ## Testes
 
-- **API:** 56 testes. Unitários para o SM-2 e a sequência de dias; de integração com **Testcontainers** (Postgres de
+- **API:** 76 testes. Unitários para o SM-2 e a sequência de dias; de integração com **Testcontainers** (Postgres de
   verdade) e MockMvc para cada módulo, incluindo o fluxo real de login com JWT e testes de **isolamento entre
   usuários** (um não vê, não altera e não usa nada do outro).
 - **Web:** 18 testes com Vitest (datas, SM-2, gráficos, expiração do token, layout).
@@ -100,7 +104,7 @@ api/                      Spring Boot
     tarefa/ materia/ flashcard/ pomodoro/ estatistica/ usuario/   um pacote por funcionalidade
     config/               segurança (JWT) e relógio
     erro/                 exceções de domínio e o tratador global
-  src/main/resources/db/migration/                                V1 a V6 (Flyway)
+  src/main/resources/db/migration/                                V1 a V7 (Flyway)
 web/                      Angular
   src/app/
     tarefas/ materias/ flashcards/ pomodoro/ painel/ auth/        uma pasta por tela

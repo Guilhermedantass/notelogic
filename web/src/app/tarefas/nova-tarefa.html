@@ -1,0 +1,103 @@
+<form class="nova" [class.aberta]="titulo().length > 0" (ngSubmit)="enviar()">
+  <div class="principal">
+    <span class="icone">add</span>
+    <input
+      name="titulo"
+      placeholder="Adicionar tarefa"
+      autocomplete="off"
+      [ngModel]="titulo()"
+      (ngModelChange)="titulo.set($event)"
+    />
+  </div>
+
+  @if (titulo().length > 0) {
+    <div class="detalhes">
+      <select class="campo" name="materia" [(ngModel)]="materiaId">
+        <option [ngValue]="null">Sem matéria</option>
+        @for (m of materias(); track m.id) {
+          <option [ngValue]="m.id">{{ m.nome }}</option>
+        }
+      </select>
+
+      <label class="data" [title]="repetir() === 'NAO' ? 'Prazo' : 'Começa em'">
+        @if (repetir() !== 'NAO') {
+          <span>a partir de</span>
+        }
+        <input class="campo" type="date" name="prazo" [(ngModel)]="prazo" />
+      </label>
+      @if (repetir() === 'NAO') {
+        <button type="button" class="campo" (click)="prazo = hoje">Hoje</button>
+      }
+
+      <select class="campo" name="prioridade" [(ngModel)]="prioridade">
+        <option ngValue="BAIXA">Prioridade baixa</option>
+        <option ngValue="MEDIA">Prioridade média</option>
+        <option ngValue="ALTA">Prioridade alta</option>
+      </select>
+
+      <label class="repetir">
+        <span class="icone">repeat</span>
+        <select class="campo" name="repetir" [ngModel]="repetir()" (ngModelChange)="repetir.set($event)">
+          <option ngValue="NAO">Não repete</option>
+          <option ngValue="DIARIA">Todo dia</option>
+          <option ngValue="DIAS_UTEIS">Dias úteis (seg a sex)</option>
+          <option ngValue="SEMANAL">Dias da semana…</option>
+          <option ngValue="A_CADA_N_DIAS">A cada N dias…</option>
+          <option ngValue="MENSAL">Todo mês…</option>
+        </select>
+      </label>
+    </div>
+
+    @if (repetir() !== 'NAO') {
+      <div class="regra">
+        @switch (repetir()) {
+          @case ('SEMANAL') {
+            <div class="dias" role="group" aria-label="Dias da semana">
+              @for (d of dias; track d.valor) {
+                <button
+                  type="button"
+                  class="dia"
+                  [class.marcado]="diasSemana().includes(d.valor)"
+                  [attr.aria-pressed]="diasSemana().includes(d.valor)"
+                  [attr.aria-label]="d.nome"
+                  [title]="d.nome"
+                  (click)="alternarDia(d.valor)"
+                >
+                  {{ d.letra }}
+                </button>
+              }
+            </div>
+          }
+          @case ('A_CADA_N_DIAS') {
+            <label class="numero">
+              A cada
+              <input class="campo" type="number" name="intervalo" min="1" max="365" [(ngModel)]="intervaloDias" />
+              dias
+            </label>
+          }
+          @case ('MENSAL') {
+            <label class="numero">
+              Todo dia
+              <input class="campo" type="number" name="diaDoMes" min="1" max="31" [(ngModel)]="diaDoMes" />
+              do mês
+            </label>
+          }
+        }
+
+        <label class="se-atrasar">
+          Se eu não fizer no dia:
+          <select class="campo" name="acumula" [(ngModel)]="acumula">
+            <option [ngValue]="false">some (expira)</option>
+            <option [ngValue]="true">vira atrasada</option>
+          </select>
+        </label>
+
+        <button type="submit" class="botao">Adicionar</button>
+      </div>
+    } @else {
+      <div class="regra so-botao">
+        <button type="submit" class="botao">Adicionar</button>
+      </div>
+    }
+  }
+</form>

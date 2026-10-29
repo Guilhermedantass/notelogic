@@ -2,9 +2,10 @@ import { httpResource } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { Materia, Tarefa, TarefaRequest } from '../core/api.models';
+import { Escopo, Materia, Recorrencia, RecorrenciaRequest, Tarefa, TarefaRequest } from '../core/api.models';
 import { formatarDia, GrupoPrazo, grupoDoPrazo, hojeIso } from '../core/datas';
 import { mensagemDeErro } from '../core/erros';
+import { RecorrenciaService } from '../core/recorrencia.service';
 import { TarefaService } from '../core/tarefa.service';
 import { NovaTarefa } from './nova-tarefa';
 import { TarefaItem } from './tarefa-item';
@@ -31,6 +32,7 @@ const TITULOS: Record<GrupoPrazo, string> = {
 })
 export class Hoje {
   private readonly tarefas = inject(TarefaService);
+  private readonly regras = inject(RecorrenciaService);
 
   protected readonly hoje = hojeIso();
   protected readonly dataExtensa = formatarDia(this.hoje, {
@@ -61,6 +63,14 @@ export class Hoje {
         ? { url: '/api/tarefas', params: this.filtro(true) }
         : undefined,
     { defaultValue: [] },
+  );
+
+  /** As regras de repetição: dão a constância ("18/20") e o molde para "esta e as próximas". */
+  protected readonly recorrencias = httpResource<Recorrencia[]>(() => '/api/recorrencias', {
+    defaultValue: [],
+  });
+  private readonly recorrenciaPorId = computed(
+    () => new Map((this.recorrencias.hasValue() ? this.recorrencias.value() : []).map((r) => [r.id, r])),
   );
 
   protected readonly listaMaterias = computed(() =>
@@ -95,6 +105,14 @@ export class Hoje {
     this.executar(this.tarefas.criar(dados));
   }
 
+  protected adicionarRecorrente(dados: RecorrenciaRequest): void {
+    this.executar(this.regras.criar(dados));
+  }
+
+  protected constanciaDe(t: Tarefa): { feitas: number; esperadas: number } | null {
+    return t.recorrencia ? (this.recorrenciaPorId().get(t.recorrencia.id) ?? null) : null;
+  }
+
   protected concluir(t: Tarefa): void {
     this.executar(this.tarefas.concluir(t.id));
   }
@@ -103,14 +121,33 @@ export class Hoje {
     this.executar(this.tarefas.reabrir(t.id));
   }
 
-  protected remover(t: Tarefa): void {
-    if (confirm(`Apagar "${t.titulo}"?`)) {
+  protected remover({ tarefa: t, escopo }: { tarefa: Tarefa; escopo: Escopo }): void {
+    if (escopo === 'proximas' && t.recorrencia && t.dataOcorrencia) {
+      // "esta e as próximas": a regra para de valer a partir do dia desta ocorrência
+      this.executar(this.regras.encerrarAPartirDe(t.recorrencia.id, t.dataOcorrencia));
+    } else if (t.recorrencia || confirm(`Apagar "${t.titulo}"?`)) {
+      // tarefa que se repete já passou pela pergunta "só esta?"; a comum ainda pede confirmação
       this.executar(this.tarefas.remover(t.id));
     }
   }
 
-  protected salvar({ tarefa, dados }: { tarefa: Tarefa; dados: TarefaRequest }): void {
-    this.executar(this.tarefas.editar(tarefa.id, dados));
+  protected salvar({ tarefa, dados, escopo }: { tarefa: Tarefa; dados: TarefaRequest; escopo: Escopo }): void {
+    const regra = tarefa.recorrencia ? this.recorrenciaPorId().get(tarefa.recorrencia.id) : undefined;
+    if (escopo === 'proximas' && regra && tarefa.dataOcorrencia) {
+      // muda o molde da regra (mantendo o "quando") e refaz as ocorrências pendentes daqui para frente
+      this.executar(
+        this.regras.editarAPartirDe(regra.id, tarefa.dataOcorrencia, {
+          titulo: dados.titulo,
+          descricao: dados.descricao,
+          materiaId: dados.materiaId,
+          prioridade: dados.prioridade,
+          regra: regra.regra,
+          acumula: regra.acumula,
+        }),
+      );
+    } else {
+      this.executar(this.tarefas.editar(tarefa.id, dados));
+    }
   }
 
   /** Toda escrita termina igual: recarrega as listas, ou mostra o erro que a API mandou. */
@@ -120,6 +157,7 @@ export class Hoje {
       next: () => {
         this.pendentes.reload();
         this.concluidas.reload();
+        this.recorrencias.reload();
       },
       error: (e) => this.erro.set(mensagemDeErro(e)),
     });
