@@ -36,8 +36,7 @@ export const routes: Routes = [
   {
     path: 'painel',
     title: 'Painel · NoteLogic',
-    data: { titulo: 'Painel', icone: 'insights' },
-    loadComponent: () => import('./shared/em-breve').then((m) => m.EmBreve),
+    loadComponent: () => import('./painel/painel').then((m) => m.Painel),
   },
   { path: '**', redirectTo: 'hoje' },
 ];

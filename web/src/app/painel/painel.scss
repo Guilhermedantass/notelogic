@@ -1,0 +1,464 @@
+.cabecalho {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+// Os filtros ficam numa linha só, acima de tudo (um controle afeta o painel inteiro)
+.periodo {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+
+  button {
+    padding: 6px 14px;
+    border-radius: 7px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--texto-suave);
+
+    &.ativo {
+      background: var(--fundo);
+      color: var(--violeta-texto);
+      box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+    }
+  }
+}
+
+h2 {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.resumo {
+  margin-top: 2px;
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+}
+
+.vazio {
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+}
+
+.cartao {
+  padding: 20px 22px;
+  border: 1px solid var(--borda);
+  border-radius: 16px;
+  background: var(--fundo);
+}
+
+// ---- números ----
+
+.numeros {
+  display: grid;
+  grid-template-columns: 1.4fr repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 18px;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: repeat(2, 1fr);
+
+    .sequencia {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 16px 18px;
+  border: 1px solid var(--borda);
+  border-radius: 16px;
+
+  .rotulo {
+    font-size: 0.8rem;
+    color: var(--texto-suave);
+  }
+
+  .valor {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+}
+
+.sequencia {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  border-radius: 16px;
+  background: var(--violeta-suave);
+
+  > .icone {
+    font-size: 44px;
+    color: var(--laranja);
+    font-variation-settings: 'FILL' 1;
+  }
+
+  div {
+    display: flex;
+    flex-direction: column;
+  }
+
+  // o número principal da tela: grande, na mesma fonte de todo o resto
+  .valor {
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--texto);
+  }
+
+  .rotulo {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--texto-suave);
+  }
+}
+
+// ---- grade dos gráficos ----
+
+.graficos {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 18px;
+  margin-bottom: 18px;
+
+  @media (max-width: 1000px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.coluna-direita {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+// ---- colunas: foco por dia ----
+
+.colunas {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  grid-template-rows: 200px auto;
+  margin-top: 20px;
+}
+
+.eixo-y {
+  position: relative;
+
+  span {
+    position: absolute;
+    right: 8px;
+    transform: translateY(50%);
+    font-size: 0.7rem;
+    color: var(--texto-suave);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.area {
+  position: relative;
+  border-bottom: 1px solid var(--borda);
+}
+
+// linhas de grade: finas, contínuas, um tom acima do fundo (não competem com os dados)
+.grade-linha {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--borda);
+  opacity: 0.6;
+}
+
+.barras {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px; // o espaço entre barras vizinhas é a cor do fundo
+}
+
+// a faixa inteira (até o topo) recebe o hover: alvo maior que a barra
+.faixa {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+
+  &:hover .barra {
+    background: var(--violeta-forte);
+  }
+}
+
+.barra {
+  width: 100%;
+  max-width: 24px;
+  border-radius: 4px 4px 0 0; // arredondada na ponta, reta na base
+  background: var(--violeta);
+  transition: height 0.4s ease;
+}
+
+.eixo-x {
+  grid-column: 2;
+  position: relative;
+  height: 22px;
+
+  span {
+    position: absolute;
+    top: 6px;
+    transform: translateX(-50%);
+    font-size: 0.7rem;
+    color: var(--texto-suave);
+    white-space: nowrap;
+  }
+}
+
+.unidade {
+  margin-top: 2px;
+  font-size: 0.7rem;
+  color: var(--texto-suave);
+}
+
+.ver-tabela {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--texto-suave);
+
+  .icone {
+    font-size: 18px;
+  }
+
+  &:hover {
+    color: var(--texto);
+  }
+}
+
+.tabela-rolagem {
+  max-height: 240px;
+  margin-top: 10px;
+  overflow-y: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+
+  th,
+  td {
+    padding: 6px 8px;
+    text-align: right;
+    border-bottom: 1px solid var(--borda);
+  }
+
+  th:first-child,
+  td:first-child {
+    text-align: left;
+  }
+
+  th {
+    position: sticky;
+    top: 0;
+    background: var(--fundo);
+    color: var(--texto-suave);
+    font-weight: 600;
+  }
+}
+
+// ---- foco por matéria ----
+
+.materia {
+  margin-top: 14px;
+}
+
+.materia-topo {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+
+  .nome {
+    font-weight: 600;
+  }
+
+  .minutos {
+    color: var(--texto-suave);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.trilho-materia {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--superficie);
+}
+
+.preenchimento {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+// ---- medidor de acertos ----
+
+.taxa {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+
+  strong {
+    margin-right: 4px;
+    font-size: 1.6rem;
+    color: var(--texto);
+  }
+}
+
+.medidor {
+  height: 10px;
+  margin-top: 10px;
+  border-radius: 999px;
+  background: var(--violeta-suave); // trilho: um tom mais claro da mesma cor
+}
+
+.medidor-preenchido {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--violeta);
+  transition: width 0.4s ease;
+}
+
+// ---- heatmap ----
+
+.heatmap-topo {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.legenda {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--texto-suave);
+}
+
+.calendario {
+  display: grid;
+  grid-template-columns: 30px auto;
+  grid-template-rows: auto auto;
+  overflow-x: auto;
+}
+
+.meses {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: repeat(var(--colunas), 16px);
+  height: 18px;
+  font-size: 0.7rem;
+  color: var(--texto-suave);
+
+  span {
+    white-space: nowrap;
+  }
+}
+
+.dias-semana {
+  display: grid;
+  grid-template-rows: repeat(7, 16px);
+  font-size: 0.65rem;
+  color: var(--texto-suave);
+  line-height: 13px;
+}
+
+.semanas {
+  display: flex;
+}
+
+.semana {
+  display: grid;
+  grid-template-rows: repeat(7, 16px);
+  width: 16px;
+}
+
+.celula {
+  width: 13px;
+  height: 13px;
+  border-radius: 3px;
+  background: var(--calor-0);
+
+  &[data-nivel='1'] {
+    background: var(--calor-1);
+  }
+
+  &[data-nivel='2'] {
+    background: var(--calor-2);
+  }
+
+  &[data-nivel='3'] {
+    background: var(--calor-3);
+  }
+
+  &[data-nivel='4'] {
+    background: var(--calor-4);
+  }
+
+  &.vazia {
+    background: transparent;
+  }
+
+  .semanas &:not(.vazia):hover {
+    outline: 2px solid var(--texto);
+    outline-offset: 1px;
+  }
+}
+
+// ---- dica (tooltip) ----
+
+.dica {
+  position: fixed;
+  z-index: 20;
+  transform: translate(-50%, calc(-100% - 10px));
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--texto);
+  color: var(--fundo);
+  font-size: 0.8rem;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: var(--sombra);
+
+  strong {
+    margin-bottom: 2px;
+
+    &::first-letter {
+      text-transform: uppercase;
+    }
+  }
+}

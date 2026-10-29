@@ -100,3 +100,25 @@ export interface IniciarSessaoRequest {
   tarefaId?: number | null;
   materiaId?: number | null;
 }
+
+// ---- Estatísticas (GET /api/estatisticas?dias=N) ----
+
+export interface DiaEstatistica {
+  data: string;
+  minutosFocados: number;
+  cartoesRevisados: number;
+  tarefasConcluidas: number;
+}
+
+export interface Estatisticas {
+  hoje: {
+    minutosFocados: number;
+    cartoesRevisados: number;
+    tarefasConcluidas: number;
+    cartoesParaRevisar: number;
+  };
+  sequencia: number;
+  taxaDeAcerto: number | null;
+  dias: DiaEstatistica[];
+  focoPorMateria: { materia: Materia; minutos: number }[];
+}

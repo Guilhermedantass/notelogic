@@ -23,6 +23,14 @@
   --raio: 12px;
   --sombra: 0 8px 30px rgb(30 20 90 / 0.08);
 
+  // Escala do heatmap: um tom só (violeta), do vazio ao intenso.
+  // Validada com o script da skill de dataviz (--ordinal): cada nível se distingue e o mais fraco aparece no fundo.
+  --calor-0: #efedf6;
+  --calor-1: #ada1ff;
+  --calor-2: #8a78ff;
+  --calor-3: #6550fb;
+  --calor-4: #3f2bd6;
+
   color-scheme: light;
 }
 
@@ -41,6 +49,13 @@
   --texto-suave: #9d97bd;
 
   --sombra: 0 8px 30px rgb(0 0 0 / 0.45);
+  // no escuro, "mais" é mais claro: o intenso precisa se destacar do fundo escuro
+  --calor-0: #1d1934;
+  --calor-1: #4536a0;
+  --calor-2: #5f4fd6;
+  --calor-3: #8273ff;
+  --calor-4: #b6acff;
+
   // as ilustrações da Storyset foram feitas para fundo branco: no escuro ficam escondidas
   --ilustracao: none;
   color-scheme: dark;

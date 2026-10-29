@@ -1,0 +1,191 @@
+<header class="cabecalho">
+  <div>
+    <h1 class="titulo-pagina">Painel</h1>
+    <p class="subtitulo-pagina">Como seus estudos estão indo.</p>
+  </div>
+  <div class="periodo" role="radiogroup" aria-label="Período">
+    @for (p of periodos; track p) {
+      <button role="radio" [attr.aria-checked]="periodo() === p" [class.ativo]="periodo() === p" (click)="periodo.set(p)">
+        {{ p }} dias
+      </button>
+    }
+  </div>
+</header>
+
+@if (estatisticas.error()) {
+  <div class="aviso-erro" role="alert"><span class="icone">error</span>Não foi possível carregar as estatísticas.</div>
+}
+
+@if (dados(); as d) {
+  <!-- ---- números do dia ---- -->
+  <section class="numeros">
+    <div class="sequencia">
+      <span class="icone" aria-hidden="true">local_fire_department</span>
+      <div>
+        <span class="valor">{{ d.sequencia }}</span>
+        <span class="rotulo">{{ d.sequencia === 1 ? 'dia seguido' : 'dias seguidos' }} estudando</span>
+      </div>
+    </div>
+    <div class="tile">
+      <span class="rotulo">Foco hoje</span>
+      <span class="valor">{{ formatarDuracao(d.hoje.minutosFocados * 60) }}</span>
+    </div>
+    <div class="tile">
+      <span class="rotulo">Cartões revisados hoje</span>
+      <span class="valor">{{ d.hoje.cartoesRevisados }}</span>
+    </div>
+    <div class="tile">
+      <span class="rotulo">Tarefas concluídas hoje</span>
+      <span class="valor">{{ d.hoje.tarefasConcluidas }}</span>
+    </div>
+    <div class="tile">
+      <span class="rotulo">Cartões para revisar</span>
+      <span class="valor">{{ d.hoje.cartoesParaRevisar }}</span>
+    </div>
+  </section>
+
+  <div class="graficos">
+    <!-- ---- foco por dia (colunas) ---- -->
+    <section class="cartao foco-dia">
+      <h2>Foco por dia</h2>
+      <p class="resumo">{{ formatarDuracao(totalFoco() * 60) }} nos últimos {{ periodo() }} dias</p>
+
+      <div class="colunas" (mouseleave)="dica.set(null)">
+        <div class="eixo-y" aria-hidden="true">
+          @for (t of ticks(); track t) {
+            <span [style.bottom.%]="(t / topo()) * 100">{{ t }}</span>
+          }
+        </div>
+        <div class="area">
+          @for (t of ticks(); track t) {
+            <div class="grade-linha" [style.bottom.%]="(t / topo()) * 100"></div>
+          }
+          <div class="barras">
+            @for (dia of d.dias; track dia.data) {
+              <div class="faixa" (mouseenter)="mostrarDica($event, dia)" [attr.aria-label]="rotuloCurto(dia.data) + ': ' + dia.minutosFocados + ' min'">
+                <div class="barra" [style.height.%]="(dia.minutosFocados / topo()) * 100"></div>
+              </div>
+            }
+          </div>
+        </div>
+        <div class="eixo-x" aria-hidden="true">
+          @for (r of rotulosX(); track r.posicao) {
+            <span [style.left.%]="r.posicao">{{ r.rotulo }}</span>
+          }
+        </div>
+      </div>
+      <p class="unidade">minutos</p>
+
+      <button class="ver-tabela" (click)="mostrarTabela.update((v) => !v)">
+        <span class="icone">table</span>{{ mostrarTabela() ? 'Esconder' : 'Ver' }} os dados em tabela
+      </button>
+      @if (mostrarTabela()) {
+        <div class="tabela-rolagem">
+          <table>
+            <thead>
+              <tr><th>Dia</th><th>Foco (min)</th><th>Cartões</th><th>Tarefas</th></tr>
+            </thead>
+            <tbody>
+              @for (dia of d.dias; track dia.data) {
+                <tr>
+                  <td>{{ rotuloCurto(dia.data) }}</td>
+                  <td>{{ dia.minutosFocados }}</td>
+                  <td>{{ dia.cartoesRevisados }}</td>
+                  <td>{{ dia.tarefasConcluidas }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+
+    <div class="coluna-direita">
+      <!-- ---- foco por matéria (barras horizontais) ---- -->
+      <section class="cartao">
+        <h2>Foco por matéria</h2>
+        @for (m of d.focoPorMateria; track m.materia.id) {
+          <div class="materia">
+            <div class="materia-topo">
+              <span class="nome">{{ m.materia.nome }}</span>
+              <span class="minutos">{{ formatarDuracao(m.minutos * 60) }}</span>
+            </div>
+            <div class="trilho-materia">
+              <div class="preenchimento" [style.width.%]="(m.minutos / maiorMateria()) * 100" [style.background]="m.materia.cor"></div>
+            </div>
+          </div>
+        } @empty {
+          <p class="vazio">Ligue sessões de foco a uma matéria para ver a divisão aqui.</p>
+        }
+      </section>
+
+      <!-- ---- taxa de acerto (medidor) ---- -->
+      <section class="cartao">
+        <h2>Acertos nos flashcards</h2>
+        @if (taxa(); as t) {
+          <p class="taxa"><strong>{{ t }}%</strong> das respostas foram Bom ou Fácil</p>
+        } @else if (taxa() === 0) {
+          <p class="taxa"><strong>0%</strong> das respostas foram Bom ou Fácil</p>
+        }
+        @if (taxa() !== null) {
+          <div class="medidor" role="meter" [attr.aria-valuenow]="taxa()" aria-valuemin="0" aria-valuemax="100">
+            <div class="medidor-preenchido" [style.width.%]="taxa()"></div>
+          </div>
+          <p class="resumo">{{ revisoesNoPeriodo() }} revisões nos últimos {{ periodo() }} dias</p>
+        } @else {
+          <p class="vazio">Nenhuma revisão no período.</p>
+        }
+      </section>
+    </div>
+  </div>
+}
+
+<!-- ---- heatmap ---- -->
+<section class="cartao heatmap">
+  <div class="heatmap-topo">
+    <div>
+      <h2>Último ano</h2>
+      <p class="resumo">{{ diasEstudados() }} dias com estudo</p>
+    </div>
+    <div class="legenda" aria-hidden="true">
+      Menos
+      @for (n of [0, 1, 2, 3, 4]; track n) {
+        <span class="celula" [attr.data-nivel]="n"></span>
+      }
+      Mais
+    </div>
+  </div>
+
+  <div class="calendario" (mouseleave)="dica.set(null)">
+    <div class="meses" [style.--colunas]="colunas().length">
+      @for (m of meses(); track m.coluna) {
+        <span [style.grid-column]="m.coluna + 1">{{ m.rotulo }}</span>
+      }
+    </div>
+    <div class="dias-semana" aria-hidden="true">
+      <span></span><span>seg</span><span></span><span>qua</span><span></span><span>sex</span><span></span>
+    </div>
+    <div class="semanas">
+      @for (semana of colunas(); track $index) {
+        <div class="semana">
+          @for (dia of semana; track $index) {
+            @if (dia) {
+              <span class="celula" [attr.data-nivel]="nivel(atividade(dia))" (mouseenter)="mostrarDica($event, dia)"></span>
+            } @else {
+              <span class="celula vazia"></span>
+            }
+          }
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+@if (dica(); as dc) {
+  <div class="dica" [style.left.px]="dc.x" [style.top.px]="dc.y" role="tooltip">
+    <strong>{{ dc.titulo }}</strong>
+    @for (l of dc.linhas; track l) {
+      <span>{{ l }}</span>
+    }
+  </div>
+}
