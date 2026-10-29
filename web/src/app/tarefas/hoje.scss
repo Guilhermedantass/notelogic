@@ -10,13 +10,9 @@
   padding: 6px 14px;
   border-radius: 999px;
   background: var(--violeta-suave);
-  color: var(--violeta);
+  color: var(--violeta-texto);
   font-weight: 700;
   font-size: 0.85rem;
-
-  @media (prefers-color-scheme: dark) {
-    color: #fff;
-  }
 }
 
 .filtros {

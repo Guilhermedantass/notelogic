@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+
+import { Tema, TemaService } from '../core/tema.service';
 
 /** A barra violeta da v1, agora na lateral. No celular ela vira uma barra de abas no rodapé. */
 @Component({
@@ -21,9 +23,24 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         }
       </nav>
 
-      <a class="credito" href="https://storyset.com" target="_blank" rel="noopener">
-        Ilustrações: Storyset
-      </a>
+      <div class="rodape">
+        <div class="seletor-tema" role="radiogroup" aria-label="Tema">
+          @for (opcao of temas; track opcao.valor) {
+            <button
+              role="radio"
+              [attr.aria-checked]="temaService.tema() === opcao.valor"
+              [class.ativo]="temaService.tema() === opcao.valor"
+              [title]="opcao.rotulo"
+              (click)="temaService.tema.set(opcao.valor)"
+            >
+              <span class="icone">{{ opcao.icone }}</span>
+            </button>
+          }
+        </div>
+        <a class="credito" href="https://storyset.com" target="_blank" rel="noopener">
+          Ilustrações: Storyset
+        </a>
+      </div>
     </aside>
   `,
   styles: `
@@ -90,9 +107,46 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
       }
     }
 
-    .credito {
+    .rodape {
       margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
       padding: 0 8px;
+    }
+
+    .seletor-tema {
+      display: flex;
+      gap: 2px;
+      padding: 3px;
+      border-radius: 10px;
+      background: rgb(255 255 255 / 0.12);
+
+      button {
+        flex: 1;
+        display: grid;
+        place-items: center;
+        padding: 5px 0;
+        border-radius: 8px;
+        color: rgb(255 255 255 / 0.7);
+        transition: background 0.15s, color 0.15s;
+
+        .icone {
+          font-size: 18px;
+        }
+
+        &:hover {
+          color: #fff;
+        }
+
+        &.ativo {
+          background: #fff;
+          color: var(--violeta);
+        }
+      }
+    }
+
+    .credito {
       font-size: 0.7rem;
       color: rgb(255 255 255 / 0.5);
     }
@@ -111,7 +165,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
       }
 
       .marca,
-      .credito {
+      .rodape {
         display: none;
       }
 
@@ -130,6 +184,14 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   `,
 })
 export class Sidebar {
+  protected readonly temaService = inject(TemaService);
+
+  protected readonly temas: { valor: Tema; icone: string; rotulo: string }[] = [
+    { valor: 'claro', icone: 'light_mode', rotulo: 'Claro' },
+    { valor: 'escuro', icone: 'dark_mode', rotulo: 'Escuro' },
+    { valor: 'sistema', icone: 'contrast', rotulo: 'Seguir o sistema' },
+  ];
+
   protected readonly itens = [
     { rota: '/hoje', icone: 'today', rotulo: 'Hoje' },
     { rota: '/flashcards', icone: 'style', rotulo: 'Flashcards' },

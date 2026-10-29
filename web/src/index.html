@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-tema="claro">
 <head>
   <meta charset="utf-8">
   <title>NoteLogic</title>
@@ -11,6 +11,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..24,400,0..1,0&display=block">
+  <!-- Aplica o tema salvo antes do Angular carregar, para a tela não "piscar" clara e depois ficar escura -->
+  <script>
+    document.documentElement.dataset.tema = localStorage.getItem('notelogic.tema') || 'claro';
+  </script>
 </head>
 <body>
   <app-root></app-root>

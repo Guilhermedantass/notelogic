@@ -5,6 +5,7 @@
   --violeta: #543efe;
   --violeta-forte: #3f2ae0;
   --violeta-suave: #eeebff;
+  --violeta-texto: #543efe;
 
   --fundo: #ffffff;
   --superficie: #f7f7fb;
@@ -22,16 +23,28 @@
   color-scheme: light;
 }
 
+// Valores do modo escuro, num mixin para não repetir nos dois seletores abaixo.
+@mixin tema-escuro {
+  --violeta-suave: #2a2560;
+  --violeta-texto: #c9c2ff;
+  --fundo: #12111a;
+  --superficie: #1b1a26;
+  --borda: #2c2a3d;
+  --texto: #ecebf5;
+  --texto-suave: #9b98b3;
+  --sombra: 0 8px 30px rgb(0 0 0 / 0.4);
+  color-scheme: dark;
+}
+
+// Escolha explícita do usuário (data-tema no <html>, gravado pelo TemaService)
+:root[data-tema='escuro'] {
+  @include tema-escuro;
+}
+
+// "Sistema": segue o sistema operacional
 @media (prefers-color-scheme: dark) {
-  :root {
-    --violeta-suave: #2a2560;
-    --fundo: #12111a;
-    --superficie: #1b1a26;
-    --borda: #2c2a3d;
-    --texto: #ecebf5;
-    --texto-suave: #9b98b3;
-    --sombra: 0 8px 30px rgb(0 0 0 / 0.4);
-    color-scheme: dark;
+  :root[data-tema='sistema'] {
+    @include tema-escuro;
   }
 }
 
