@@ -6,19 +6,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import dev.guilherme.notelogic.erro.RecursoNaoEncontradoException;
+import dev.guilherme.notelogic.materia.Materia;
+import dev.guilherme.notelogic.materia.MateriaService;
 
 @Service
 public class TarefaService {
 
     private final TarefaRepository repository;
+    private final MateriaService materias;
 
-    public TarefaService(TarefaRepository repository) {
+    public TarefaService(TarefaRepository repository, MateriaService materias) {
         this.repository = repository;
+        this.materias = materias;
     }
 
     @Transactional(readOnly = true)
-    public List<Tarefa> listar() {
-        return repository.findAllByOrderByIdAsc();
+    public List<Tarefa> listar(Long materiaId, Boolean concluida) {
+        return repository.filtrar(materiaId, concluida);
     }
 
     @Transactional(readOnly = true)
@@ -27,14 +31,16 @@ public class TarefaService {
     }
 
     @Transactional
-    public Tarefa criar(String titulo, String descricao) {
-        return repository.save(new Tarefa(titulo, descricao));
+    public Tarefa criar(TarefaRequest dados) {
+        Tarefa tarefa = new Tarefa(dados.titulo(), dados.descricao(), materiaDe(dados), dados.prazo(),
+                dados.prioridade());
+        return repository.save(tarefa);
     }
 
     @Transactional
-    public Tarefa editar(Long id, String titulo, String descricao) {
+    public Tarefa editar(Long id, TarefaRequest dados) {
         Tarefa tarefa = buscar(id);
-        tarefa.editar(titulo, descricao);
+        tarefa.editar(dados.titulo(), dados.descricao(), materiaDe(dados), dados.prazo(), dados.prioridade());
         return tarefa;
     }
 
@@ -55,5 +61,9 @@ public class TarefaService {
     @Transactional
     public void remover(Long id) {
         repository.delete(buscar(id));
+    }
+
+    private Materia materiaDe(TarefaRequest dados) {
+        return dados.materiaId() != null ? materias.buscar(dados.materiaId()) : null;
     }
 }

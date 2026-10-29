@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDate;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import dev.guilherme.notelogic.TestcontainersConfiguration;
+import dev.guilherme.notelogic.materia.Materia;
+import dev.guilherme.notelogic.materia.MateriaRepository;
 
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest
@@ -30,9 +34,13 @@ class TarefaControllerTests {
     @Autowired
     TarefaRepository repository;
 
+    @Autowired
+    MateriaRepository materias;
+
     @BeforeEach
     void limpa() {
         repository.deleteAll();
+        materias.deleteAll();
     }
 
     @Test
@@ -82,7 +90,7 @@ class TarefaControllerTests {
 
     @Test
     void editaConcluiEReabre() throws Exception {
-        Long id = repository.save(new Tarefa("Antigo", null)).getId();
+        Long id = repository.save(new Tarefa("Antigo", null, null, null, null)).getId();
 
         mvc.perform(put("/api/tarefas/{id}", id).contentType(MediaType.APPLICATION_JSON).content("""
                 {"titulo": "Novo", "descricao": "editada"}
@@ -99,9 +107,66 @@ class TarefaControllerTests {
 
     @Test
     void remove() throws Exception {
-        Long id = repository.save(new Tarefa("Apagar", null)).getId();
+        Long id = repository.save(new Tarefa("Apagar", null, null, null, null)).getId();
 
         mvc.perform(delete("/api/tarefas/{id}", id)).andExpect(status().isNoContent());
         mvc.perform(get("/api/tarefas/{id}", id)).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void criaComMateriaPrazoEPrioridade() throws Exception {
+        Long materiaId = materias.save(new Materia("Grafos", "#543EFE")).getId();
+
+        mvc.perform(post("/api/tarefas").contentType(MediaType.APPLICATION_JSON).content("""
+                {"titulo": "Lista de exercícios", "materiaId": %d, "prazo": "2026-11-05", "prioridade": "ALTA"}
+                """.formatted(materiaId)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.materia.nome").value("Grafos"))
+                .andExpect(jsonPath("$.materia.cor").value("#543EFE"))
+                .andExpect(jsonPath("$.prazo").value("2026-11-05"))
+                .andExpect(jsonPath("$.prioridade").value("ALTA"));
+    }
+
+    @Test
+    void semPrioridadeFicaMedia() throws Exception {
+        mvc.perform(post("/api/tarefas").contentType(MediaType.APPLICATION_JSON).content("""
+                {"titulo": "Qualquer coisa"}
+                """))
+                .andExpect(jsonPath("$.prioridade").value("MEDIA"))
+                .andExpect(jsonPath("$.materia").doesNotExist());
+    }
+
+    @Test
+    void materiaInexistenteDa404() throws Exception {
+        mvc.perform(post("/api/tarefas").contentType(MediaType.APPLICATION_JSON).content("""
+                {"titulo": "Órfã", "materiaId": 999}
+                """))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.detail").value("Matéria 999 não encontrado(a)"));
+    }
+
+    @Test
+    void filtraPorMateriaEStatusComPendentesPrimeiro() throws Exception {
+        Materia grafos = materias.save(new Materia("Grafos", "#543EFE"));
+        Materia ingles = materias.save(new Materia("Inglês", "#22AA55"));
+        repository.save(new Tarefa("Sem prazo", null, grafos, null, null));
+        repository.save(new Tarefa("Prazo cedo", null, grafos, LocalDate.of(2026, 11, 1), null));
+        Tarefa feita = new Tarefa("Já feita", null, grafos, LocalDate.of(2026, 10, 1), null);
+        feita.concluir();
+        repository.save(feita);
+        repository.save(new Tarefa("Vocabulário", null, ingles, null, null));
+
+        mvc.perform(get("/api/tarefas").param("materiaId", grafos.getId().toString()))
+                .andExpect(jsonPath("$.length()").value(3))
+                .andExpect(jsonPath("$[0].titulo").value("Prazo cedo"))
+                .andExpect(jsonPath("$[1].titulo").value("Sem prazo"))
+                .andExpect(jsonPath("$[2].titulo").value("Já feita"));
+
+        mvc.perform(get("/api/tarefas").param("concluida", "false"))
+                .andExpect(jsonPath("$.length()").value(3));
+
+        mvc.perform(get("/api/tarefas").param("materiaId", grafos.getId().toString()).param("concluida", "true"))
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].titulo").value("Já feita"));
     }
 }

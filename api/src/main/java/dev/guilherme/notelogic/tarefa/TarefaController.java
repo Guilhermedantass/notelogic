@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,8 +28,9 @@ public class TarefaController {
     }
 
     @GetMapping
-    public List<TarefaResponse> listar() {
-        return service.listar().stream().map(TarefaResponse::de).toList();
+    public List<TarefaResponse> listar(@RequestParam(required = false) Long materiaId,
+            @RequestParam(required = false) Boolean concluida) {
+        return service.listar(materiaId, concluida).stream().map(TarefaResponse::de).toList();
     }
 
     @GetMapping("/{id}")
@@ -39,12 +41,12 @@ public class TarefaController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public TarefaResponse criar(@Valid @RequestBody TarefaRequest request) {
-        return TarefaResponse.de(service.criar(request.titulo(), request.descricao()));
+        return TarefaResponse.de(service.criar(request));
     }
 
     @PutMapping("/{id}")
     public TarefaResponse editar(@PathVariable Long id, @Valid @RequestBody TarefaRequest request) {
-        return TarefaResponse.de(service.editar(id, request.titulo(), request.descricao()));
+        return TarefaResponse.de(service.editar(id, request));
     }
 
     @PatchMapping("/{id}/concluir")

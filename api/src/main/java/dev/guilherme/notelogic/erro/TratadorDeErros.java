@@ -28,6 +28,13 @@ public class TratadorDeErros extends ResponseEntityExceptionHandler {
         return problema;
     }
 
+    @ExceptionHandler(ConflitoException.class)
+    ProblemDetail conflito(ConflitoException ex) {
+        ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+        problema.setTitle("Conflito");
+        return problema;
+    }
+
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
             HttpHeaders headers, HttpStatusCode status, WebRequest request) {

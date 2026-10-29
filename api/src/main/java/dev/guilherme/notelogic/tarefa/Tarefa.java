@@ -1,12 +1,19 @@
 package dev.guilherme.notelogic.tarefa;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
+import dev.guilherme.notelogic.materia.Materia;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 @Entity
 public class Tarefa {
@@ -27,20 +34,34 @@ public class Tarefa {
     @Column(nullable = false, updatable = false)
     private Instant criadaEm;
 
+    /** Opcional: uma tarefa pode não ser de matéria nenhuma. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "materia_id")
+    private Materia materia;
+
+    /** Um dia do calendário, sem hora nem fuso: "entregar até 05/11". */
+    private LocalDate prazo;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    private Prioridade prioridade;
+
     protected Tarefa() {
         // exigido pelo JPA
     }
 
-    public Tarefa(String titulo, String descricao) {
-        this.titulo = titulo;
-        this.descricao = descricao;
-        this.concluida = false;
+    public Tarefa(String titulo, String descricao, Materia materia, LocalDate prazo, Prioridade prioridade) {
         this.criadaEm = Instant.now();
+        this.concluida = false;
+        editar(titulo, descricao, materia, prazo, prioridade);
     }
 
-    public void editar(String titulo, String descricao) {
+    public void editar(String titulo, String descricao, Materia materia, LocalDate prazo, Prioridade prioridade) {
         this.titulo = titulo;
         this.descricao = descricao;
+        this.materia = materia;
+        this.prazo = prazo;
+        this.prioridade = prioridade != null ? prioridade : Prioridade.MEDIA;
     }
 
     public void concluir() {
@@ -69,5 +90,17 @@ public class Tarefa {
 
     public Instant getCriadaEm() {
         return criadaEm;
+    }
+
+    public Materia getMateria() {
+        return materia;
+    }
+
+    public LocalDate getPrazo() {
+        return prazo;
+    }
+
+    public Prioridade getPrioridade() {
+        return prioridade;
     }
 }
