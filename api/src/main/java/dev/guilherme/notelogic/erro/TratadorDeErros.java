@@ -3,6 +3,7 @@ package dev.guilherme.notelogic.erro;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -32,6 +33,22 @@ public class TratadorDeErros extends ResponseEntityExceptionHandler {
     ProblemDetail conflito(ConflitoException ex) {
         ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
         problema.setTitle("Conflito");
+        return problema;
+    }
+
+    /** Última linha de defesa: uma restrição do banco (unique, FK) barrou a operação. */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    ProblemDetail integridade(DataIntegrityViolationException ex) {
+        ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
+                "A operação conflita com dados já existentes");
+        problema.setTitle("Conflito");
+        return problema;
+    }
+
+    @ExceptionHandler(RegraVioladaException.class)
+    ProblemDetail regraViolada(RegraVioladaException ex) {
+        ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage());
+        problema.setTitle("Regra de negócio violada");
         return problema;
     }
 
