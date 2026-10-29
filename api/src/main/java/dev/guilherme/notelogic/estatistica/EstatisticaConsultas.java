@@ -89,6 +89,7 @@ public class EstatisticaConsultas {
                 where s.tipo = 'FOCO' and s.status <> 'EM_ANDAMENTO'
                   and s.iniciada_em >= :inicio and s.iniciada_em < :fim
                 group by m.id, m.nome, m.cor
+                having sum(s.segundos_focados) >= 60
                 order by segundos desc
                 """)
                 .param("inicio", utc(inicio))
