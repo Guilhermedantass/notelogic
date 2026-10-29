@@ -21,6 +21,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import dev.guilherme.notelogic.TestcontainersConfiguration;
+import dev.guilherme.notelogic.Autenticacao;
+import dev.guilherme.notelogic.usuario.UsuarioRepository;
 import dev.guilherme.notelogic.materia.Materia;
 import dev.guilherme.notelogic.materia.MateriaRepository;
 
@@ -38,10 +40,16 @@ class TarefaControllerTests {
     @Autowired
     MateriaRepository materias;
 
+    @Autowired
+    UsuarioRepository usuarios;
+
+    Long eu;
+
     @BeforeEach
     void limpa() {
         repository.deleteAll();
         materias.deleteAll();
+        eu = Autenticacao.logarComo(usuarios, "eu@teste.dev");
     }
 
     @Test
@@ -91,7 +99,7 @@ class TarefaControllerTests {
 
     @Test
     void editaConcluiEReabre() throws Exception {
-        Long id = repository.save(new Tarefa("Antigo", null, null, null, null)).getId();
+        Long id = repository.save(new Tarefa(eu, "Antigo", null, null, null, null)).getId();
 
         mvc.perform(put("/api/tarefas/{id}", id).contentType(MediaType.APPLICATION_JSON).content("""
                 {"titulo": "Novo", "descricao": "editada"}
@@ -110,7 +118,7 @@ class TarefaControllerTests {
 
     @Test
     void remove() throws Exception {
-        Long id = repository.save(new Tarefa("Apagar", null, null, null, null)).getId();
+        Long id = repository.save(new Tarefa(eu, "Apagar", null, null, null, null)).getId();
 
         mvc.perform(delete("/api/tarefas/{id}", id)).andExpect(status().isNoContent());
         mvc.perform(get("/api/tarefas/{id}", id)).andExpect(status().isNotFound());
@@ -118,7 +126,7 @@ class TarefaControllerTests {
 
     @Test
     void criaComMateriaPrazoEPrioridade() throws Exception {
-        Long materiaId = materias.save(new Materia("Grafos", "#543EFE")).getId();
+        Long materiaId = materias.save(new Materia(eu, "Grafos", "#543EFE")).getId();
 
         mvc.perform(post("/api/tarefas").contentType(MediaType.APPLICATION_JSON).content("""
                 {"titulo": "Lista de exercícios", "materiaId": %d, "prazo": "2026-11-05", "prioridade": "ALTA"}
@@ -150,14 +158,14 @@ class TarefaControllerTests {
 
     @Test
     void filtraPorMateriaEStatusComPendentesPrimeiro() throws Exception {
-        Materia grafos = materias.save(new Materia("Grafos", "#543EFE"));
-        Materia ingles = materias.save(new Materia("Inglês", "#22AA55"));
-        repository.save(new Tarefa("Sem prazo", null, grafos, null, null));
-        repository.save(new Tarefa("Prazo cedo", null, grafos, LocalDate.of(2026, 11, 1), null));
-        Tarefa feita = new Tarefa("Já feita", null, grafos, LocalDate.of(2026, 10, 1), null);
+        Materia grafos = materias.save(new Materia(eu, "Grafos", "#543EFE"));
+        Materia ingles = materias.save(new Materia(eu, "Inglês", "#22AA55"));
+        repository.save(new Tarefa(eu, "Sem prazo", null, grafos, null, null));
+        repository.save(new Tarefa(eu, "Prazo cedo", null, grafos, LocalDate.of(2026, 11, 1), null));
+        Tarefa feita = new Tarefa(eu, "Já feita", null, grafos, LocalDate.of(2026, 10, 1), null);
         feita.concluir(Instant.now());
         repository.save(feita);
-        repository.save(new Tarefa("Vocabulário", null, ingles, null, null));
+        repository.save(new Tarefa(eu, "Vocabulário", null, ingles, null, null));
 
         mvc.perform(get("/api/tarefas").param("materiaId", grafos.getId().toString()))
                 .andExpect(jsonPath("$.length()").value(3))

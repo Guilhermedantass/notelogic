@@ -22,6 +22,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.jayway.jsonpath.JsonPath;
 
 import dev.guilherme.notelogic.TestcontainersConfiguration;
+import dev.guilherme.notelogic.Autenticacao;
+import dev.guilherme.notelogic.usuario.UsuarioRepository;
 
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest
@@ -45,10 +47,16 @@ class FlashcardControllerTests {
 
     LocalDate hoje;
 
+    @Autowired
+    UsuarioRepository usuarios;
+
+    Long eu;
+
     @BeforeEach
     void limpa() {
         baralhos.deleteAll(); // cascade apaga cartões e revisões
         hoje = LocalDate.now(clock);
+        eu = Autenticacao.logarComo(usuarios, "eu@teste.dev");
     }
 
     @Test

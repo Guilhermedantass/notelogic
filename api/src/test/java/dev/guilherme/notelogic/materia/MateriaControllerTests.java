@@ -18,6 +18,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import dev.guilherme.notelogic.TestcontainersConfiguration;
+import dev.guilherme.notelogic.Autenticacao;
+import dev.guilherme.notelogic.usuario.UsuarioRepository;
 import dev.guilherme.notelogic.tarefa.Tarefa;
 import dev.guilherme.notelogic.tarefa.TarefaRepository;
 
@@ -35,10 +37,16 @@ class MateriaControllerTests {
     @Autowired
     TarefaRepository tarefas;
 
+    @Autowired
+    UsuarioRepository usuarios;
+
+    Long eu;
+
     @BeforeEach
     void limpa() {
         tarefas.deleteAll();
         repository.deleteAll();
+        eu = Autenticacao.logarComo(usuarios, "eu@teste.dev");
     }
 
     @Test
@@ -74,7 +82,7 @@ class MateriaControllerTests {
 
     @Test
     void editaMantendoOProprioNome() throws Exception {
-        Long id = repository.save(new Materia("Grafos", "#543EFE")).getId();
+        Long id = repository.save(new Materia(eu, "Grafos", "#543EFE")).getId();
 
         mvc.perform(put("/api/materias/{id}", id).contentType(MediaType.APPLICATION_JSON).content("""
                 {"nome": "Grafos", "cor": "#111111"}
@@ -85,8 +93,8 @@ class MateriaControllerTests {
 
     @Test
     void removerMateriaNaoApagaAsTarefas() throws Exception {
-        Materia materia = repository.save(new Materia("Grafos", "#543EFE"));
-        Long tarefaId = tarefas.save(new Tarefa("Lista 1", null, materia, null, null)).getId();
+        Materia materia = repository.save(new Materia(eu, "Grafos", "#543EFE"));
+        Long tarefaId = tarefas.save(new Tarefa(eu, "Lista 1", null, materia, null, null)).getId();
 
         mvc.perform(delete("/api/materias/{id}", materia.getId())).andExpect(status().isNoContent());
 

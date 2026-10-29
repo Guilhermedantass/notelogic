@@ -29,6 +29,10 @@ public class SessaoFoco {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Dono do dado. Só o id (e não um @ManyToOne Usuario): nenhuma tela precisa carregar o usuário junto. */
+    @Column(name = "usuario_id", nullable = false, updatable = false)
+    private Long usuarioId;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 15)
     private TipoSessao tipo;
@@ -64,10 +68,12 @@ public class SessaoFoco {
      * Se vier uma tarefa, a matéria é a dela (a sessão "herda" a matéria).
      * Pausas não pertencem a nada: são descanso.
      */
-    public SessaoFoco(TipoSessao tipo, Integer duracaoMin, Tarefa tarefa, Materia materia, Instant agora) {
+    public SessaoFoco(Long usuarioId, TipoSessao tipo, Integer duracaoMin, Tarefa tarefa, Materia materia,
+            Instant agora) {
         if (tipo.ehPausa() && (tarefa != null || materia != null)) {
             throw new RegraVioladaException("Pausas não podem ser ligadas a uma tarefa ou matéria");
         }
+        this.usuarioId = usuarioId;
         this.tipo = tipo;
         this.status = StatusSessao.EM_ANDAMENTO;
         this.duracaoPlanejadaMin = duracaoMin != null ? duracaoMin : tipo.minutosPadrao();
@@ -100,6 +106,10 @@ public class SessaoFoco {
 
     public Long getId() {
         return id;
+    }
+
+    public Long getUsuarioId() {
+        return usuarioId;
     }
 
     public TipoSessao getTipo() {

@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
+import { AuthService } from '../core/auth.service';
 import { Tema, TemaService } from '../core/tema.service';
 import { Logo } from './logo';
 
@@ -24,6 +25,18 @@ import { Logo } from './logo';
       </nav>
 
       <div class="rodape">
+        @if (auth.usuario(); as u) {
+          <div class="conta">
+            <span class="avatar" aria-hidden="true">{{ u.nome.charAt(0).toUpperCase() }}</span>
+            <div class="quem">
+              <strong>{{ u.nome }}</strong>
+              <span>{{ u.email }}</span>
+            </div>
+            <button class="botao-icone" (click)="auth.sair()" title="Sair" aria-label="Sair">
+              <span class="icone">logout</span>
+            </button>
+          </div>
+        }
         <div class="seletor-tema" role="radiogroup" aria-label="Tema">
           @for (opcao of temas; track opcao.valor) {
             <button
@@ -102,6 +115,46 @@ import { Logo } from './logo';
       padding: 0 6px;
     }
 
+    .conta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--borda);
+    }
+
+    .avatar {
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--violeta);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .quem {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      font-size: 0.8rem;
+
+      strong,
+      span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      span {
+        color: var(--texto-suave);
+        font-size: 0.72rem;
+      }
+    }
+
     .seletor-tema {
       display: flex;
       gap: 2px;
@@ -177,6 +230,7 @@ import { Logo } from './logo';
 })
 export class Sidebar {
   protected readonly temaService = inject(TemaService);
+  protected readonly auth = inject(AuthService);
 
   protected readonly itens = [
     { rota: '/hoje', icone: 'today', rotulo: 'Hoje' },

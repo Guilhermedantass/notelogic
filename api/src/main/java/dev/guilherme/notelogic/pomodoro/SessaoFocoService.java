@@ -15,6 +15,7 @@ import dev.guilherme.notelogic.materia.Materia;
 import dev.guilherme.notelogic.materia.MateriaService;
 import dev.guilherme.notelogic.tarefa.Tarefa;
 import dev.guilherme.notelogic.tarefa.TarefaService;
+import dev.guilherme.notelogic.usuario.UsuarioAtual;
 
 @Service
 public class SessaoFocoService {
@@ -23,29 +24,31 @@ public class SessaoFocoService {
     private final TarefaService tarefas;
     private final MateriaService materias;
     private final Clock clock;
+    private final UsuarioAtual usuario;
 
     public SessaoFocoService(SessaoFocoRepository repository, TarefaService tarefas, MateriaService materias,
-            Clock clock) {
+            Clock clock, UsuarioAtual usuario) {
         this.repository = repository;
         this.tarefas = tarefas;
         this.materias = materias;
         this.clock = clock;
+        this.usuario = usuario;
     }
 
     @Transactional
     public SessaoFoco iniciar(TipoSessao tipo, Integer duracaoMin, Long tarefaId, Long materiaId) {
         // Checagem "amigável", com mensagem clara. O índice único do banco cobre a corrida entre duas requisições.
-        if (repository.existsByStatus(StatusSessao.EM_ANDAMENTO)) {
+        if (repository.existsByUsuarioIdAndStatus(usuario.id(), StatusSessao.EM_ANDAMENTO)) {
             throw new ConflitoException("Já existe uma sessão em andamento");
         }
         Tarefa tarefa = tarefaId != null ? tarefas.buscar(tarefaId) : null;
         Materia materia = tarefa == null && materiaId != null ? materias.buscar(materiaId) : null;
-        return repository.save(new SessaoFoco(tipo, duracaoMin, tarefa, materia, clock.instant()));
+        return repository.save(new SessaoFoco(usuario.id(), tipo, duracaoMin, tarefa, materia, clock.instant()));
     }
 
     @Transactional(readOnly = true)
     public Optional<SessaoFoco> atual() {
-        return repository.findFirstByStatus(StatusSessao.EM_ANDAMENTO);
+        return repository.findFirstByUsuarioIdAndStatus(usuario.id(), StatusSessao.EM_ANDAMENTO);
     }
 
     @Transactional
@@ -67,7 +70,8 @@ public class SessaoFocoService {
     public List<SessaoFoco> listar(LocalDate de, LocalDate ate) {
         Instant inicio = de.atStartOfDay(clock.getZone()).toInstant();
         Instant fim = ate.plusDays(1).atStartOfDay(clock.getZone()).toInstant();
-        return repository.findByIniciadaEmGreaterThanEqualAndIniciadaEmLessThanOrderByIniciadaEmDesc(inicio, fim);
+        return repository.findByUsuarioIdAndIniciadaEmGreaterThanEqualAndIniciadaEmLessThanOrderByIniciadaEmDesc(
+                usuario.id(), inicio, fim);
     }
 
     public LocalDate hoje() {
@@ -75,6 +79,7 @@ public class SessaoFocoService {
     }
 
     private SessaoFoco buscar(Long id) {
-        return repository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Sessão", id));
+        return repository.findByIdAndUsuarioId(id, usuario.id())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Sessão", id));
     }
 }

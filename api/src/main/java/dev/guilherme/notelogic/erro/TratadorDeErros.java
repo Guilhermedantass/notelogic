@@ -45,6 +45,13 @@ public class TratadorDeErros extends ResponseEntityExceptionHandler {
         return problema;
     }
 
+    @ExceptionHandler(CredenciaisInvalidasException.class)
+    ProblemDetail credenciaisInvalidas(CredenciaisInvalidasException ex) {
+        ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
+        problema.setTitle("Não autenticado");
+        return problema;
+    }
+
     @ExceptionHandler(RegraVioladaException.class)
     ProblemDetail regraViolada(RegraVioladaException ex) {
         ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage());

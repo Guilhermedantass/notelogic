@@ -16,6 +16,10 @@ public class Materia {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Dono do dado. Só o id (e não um @ManyToOne Usuario): nenhuma tela precisa carregar o usuário junto. */
+    @Column(name = "usuario_id", nullable = false, updatable = false)
+    private Long usuarioId;
+
     @Column(nullable = false, length = 100)
     private String nome;
 
@@ -30,7 +34,8 @@ public class Materia {
         // exigido pelo JPA
     }
 
-    public Materia(String nome, String cor) {
+    public Materia(Long usuarioId, String nome, String cor) {
+        this.usuarioId = usuarioId;
         this.nome = nome;
         this.cor = cor;
         this.criadaEm = Instant.now();
@@ -43,6 +48,10 @@ public class Materia {
 
     public Long getId() {
         return id;
+    }
+
+    public Long getUsuarioId() {
+        return usuarioId;
     }
 
     public String getNome() {

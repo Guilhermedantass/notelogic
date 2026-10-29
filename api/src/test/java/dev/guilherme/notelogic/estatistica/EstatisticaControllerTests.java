@@ -22,6 +22,8 @@ import com.jayway.jsonpath.JsonPath;
 
 import dev.guilherme.notelogic.RelogioAjustavel;
 import dev.guilherme.notelogic.TestcontainersConfiguration;
+import dev.guilherme.notelogic.Autenticacao;
+import dev.guilherme.notelogic.usuario.UsuarioRepository;
 import dev.guilherme.notelogic.flashcard.BaralhoRepository;
 import dev.guilherme.notelogic.materia.MateriaRepository;
 import dev.guilherme.notelogic.pomodoro.SessaoFocoRepository;
@@ -57,12 +59,18 @@ class EstatisticaControllerTests {
     @Autowired
     MateriaRepository materias;
 
+    @Autowired
+    UsuarioRepository usuarios;
+
+    Long eu;
+
     @BeforeEach
     void limpa() {
         sessoes.deleteAll();
         baralhos.deleteAll();
         tarefas.deleteAll();
         materias.deleteAll();
+        eu = Autenticacao.logarComo(usuarios, "eu@teste.dev");
     }
 
     @Test

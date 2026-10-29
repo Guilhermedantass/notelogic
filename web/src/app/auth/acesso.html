@@ -1,0 +1,66 @@
+<main class="acesso">
+  <section class="formulario">
+    <app-logo class="marca" />
+
+    <div class="caixa">
+      <h1>{{ cadastro() ? 'Crie sua conta' : 'Bem-vindo de volta' }}</h1>
+      <p class="sub">
+        @if (cadastro()) {
+          Já tem conta? <a routerLink="/entrar">Entrar</a>
+        } @else {
+          Primeira vez aqui? <a routerLink="/cadastro">Criar conta</a>
+        }
+      </p>
+
+      @if (erro(); as mensagem) {
+        <div class="aviso-erro" role="alert"><span class="icone">error</span>{{ mensagem }}</div>
+      }
+
+      <form (ngSubmit)="enviar()">
+        @if (cadastro()) {
+          <label>
+            <span>Nome</span>
+            <input class="campo" name="nome" autocomplete="name" required [(ngModel)]="nome" />
+          </label>
+        }
+        <label>
+          <span>E-mail</span>
+          <input class="campo" type="email" name="email" autocomplete="email" required [(ngModel)]="email" />
+        </label>
+        <label>
+          <span>Senha</span>
+          <div class="senha">
+            <input
+              class="campo"
+              [type]="mostrarSenha() ? 'text' : 'password'"
+              name="senha"
+              [autocomplete]="cadastro() ? 'new-password' : 'current-password'"
+              required
+              [(ngModel)]="senha"
+            />
+            <button
+              type="button"
+              class="botao-icone"
+              (click)="mostrarSenha.update((v) => !v)"
+              [attr.aria-label]="mostrarSenha() ? 'Esconder senha' : 'Mostrar senha'"
+            >
+              <span class="icone">{{ mostrarSenha() ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+          @if (cadastro()) {
+            <small>Pelo menos 8 caracteres.</small>
+          }
+        </label>
+
+        <button type="submit" class="botao enviar" [disabled]="enviando()">
+          {{ enviando() ? 'Aguarde…' : cadastro() ? 'Criar conta' : 'Entrar' }}
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <section class="vitrine">
+    <img [src]="cadastro() ? 'img/cadastro.svg' : 'img/entrar.svg'" alt="" />
+    <p>Tarefas, flashcards e pomodoro<br />no mesmo lugar.</p>
+  </section>
+</main>

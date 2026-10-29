@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import dev.guilherme.notelogic.erro.RecursoNaoEncontradoException;
+import dev.guilherme.notelogic.usuario.UsuarioAtual;
 
 @Service
 public class CartaoService {
@@ -16,13 +17,15 @@ public class CartaoService {
     private final RevisaoRepository revisoes;
     private final BaralhoService baralhos;
     private final Clock clock;
+    private final UsuarioAtual usuario;
 
     public CartaoService(CartaoRepository repository, RevisaoRepository revisoes, BaralhoService baralhos,
-            Clock clock) {
+            Clock clock, UsuarioAtual usuario) {
         this.repository = repository;
         this.revisoes = revisoes;
         this.baralhos = baralhos;
         this.clock = clock;
+        this.usuario = usuario;
     }
 
     @Transactional(readOnly = true)
@@ -40,7 +43,8 @@ public class CartaoService {
 
     @Transactional(readOnly = true)
     public Cartao buscar(Long id) {
-        return repository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Cartão", id));
+        return repository.findByIdAndBaralhoUsuarioId(id, usuario.id())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Cartão", id));
     }
 
     @Transactional

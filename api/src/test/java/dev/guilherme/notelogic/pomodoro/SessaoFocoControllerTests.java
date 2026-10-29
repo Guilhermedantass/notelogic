@@ -23,6 +23,8 @@ import com.jayway.jsonpath.JsonPath;
 
 import dev.guilherme.notelogic.RelogioAjustavel;
 import dev.guilherme.notelogic.TestcontainersConfiguration;
+import dev.guilherme.notelogic.Autenticacao;
+import dev.guilherme.notelogic.usuario.UsuarioRepository;
 import dev.guilherme.notelogic.materia.Materia;
 import dev.guilherme.notelogic.materia.MateriaRepository;
 import dev.guilherme.notelogic.tarefa.Tarefa;
@@ -51,12 +53,18 @@ class SessaoFocoControllerTests {
     @Autowired
     MateriaRepository materias;
 
+    @Autowired
+    UsuarioRepository usuarios;
+
+    Long eu;
+
     @BeforeEach
     void limpa() {
         sessoes.deleteAll();
         tarefas.deleteAll();
         materias.deleteAll();
         relogio.ajustar(INICIO);
+        eu = Autenticacao.logarComo(usuarios, "eu@teste.dev");
     }
 
     @Test
@@ -71,8 +79,8 @@ class SessaoFocoControllerTests {
 
     @Test
     void sessaoComTarefaHerdaAMateriaDela() throws Exception {
-        Materia grafos = materias.save(new Materia("Grafos", "#543EFE"));
-        Long tarefa = tarefas.save(new Tarefa("Lista 3", null, grafos, null, null)).getId();
+        Materia grafos = materias.save(new Materia(eu, "Grafos", "#543EFE"));
+        Long tarefa = tarefas.save(new Tarefa(eu, "Lista 3", null, grafos, null, null)).getId();
 
         iniciar("{\"tipo\": \"FOCO\", \"tarefaId\": %d}".formatted(tarefa))
                 .andExpect(jsonPath("$.tarefa.titulo").value("Lista 3"))
@@ -134,7 +142,7 @@ class SessaoFocoControllerTests {
 
     @Test
     void pausaLigadaATarefaDa422() throws Exception {
-        Long tarefa = tarefas.save(new Tarefa("Lista 3", null, null, null, null)).getId();
+        Long tarefa = tarefas.save(new Tarefa(eu, "Lista 3", null, null, null, null)).getId();
 
         iniciar("{\"tipo\": \"PAUSA_CURTA\", \"tarefaId\": %d}".formatted(tarefa))
                 .andExpect(status().isUnprocessableContent())

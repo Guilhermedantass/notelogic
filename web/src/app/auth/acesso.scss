@@ -1,0 +1,125 @@
+.acesso {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: 100vh;
+
+  @media (max-width: 860px) {
+    grid-template-columns: 1fr;
+
+    .vitrine {
+      display: none;
+    }
+  }
+}
+
+// ---- lado do formulário ----
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  padding: 32px clamp(24px, 6vw, 80px);
+}
+
+.caixa {
+  width: min(380px, 100%);
+  margin: auto;
+}
+
+h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.sub {
+  margin: 6px 0 28px;
+  color: var(--texto-suave);
+
+  a {
+    font-weight: 700;
+    color: var(--violeta-texto);
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  > span {
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  small {
+    font-size: 0.75rem;
+    color: var(--texto-suave);
+  }
+}
+
+.campo {
+  padding: 11px 14px;
+}
+
+.senha {
+  position: relative;
+
+  .campo {
+    width: 100%;
+    padding-right: 44px;
+  }
+
+  .botao-icone {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
+
+.enviar {
+  justify-content: center;
+  margin-top: 8px;
+  padding: 12px;
+  font-size: 1rem;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+}
+
+// ---- lado da ilustração ----
+
+.vitrine {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 48px;
+  background: var(--violeta-suave);
+
+  img {
+    display: var(--ilustracao, block);
+    width: min(520px, 90%);
+  }
+
+  p {
+    font-size: 1.3rem;
+    font-weight: 700;
+    line-height: 1.4;
+    text-align: center;
+    color: var(--violeta-texto);
+  }
+}

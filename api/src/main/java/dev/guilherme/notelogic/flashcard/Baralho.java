@@ -23,6 +23,10 @@ public class Baralho {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Dono do dado. Só o id (e não um @ManyToOne Usuario): nenhuma tela precisa carregar o usuário junto. */
+    @Column(name = "usuario_id", nullable = false, updatable = false)
+    private Long usuarioId;
+
     @Column(nullable = false, length = 100)
     private String nome;
 
@@ -44,7 +48,8 @@ public class Baralho {
         // exigido pelo JPA
     }
 
-    public Baralho(String nome, String descricao, Materia materia) {
+    public Baralho(Long usuarioId, String nome, String descricao, Materia materia) {
+        this.usuarioId = usuarioId;
         this.criadoEm = Instant.now();
         editar(nome, descricao, materia);
     }
@@ -57,6 +62,10 @@ public class Baralho {
 
     public Long getId() {
         return id;
+    }
+
+    public Long getUsuarioId() {
+        return usuarioId;
     }
 
     public String getNome() {

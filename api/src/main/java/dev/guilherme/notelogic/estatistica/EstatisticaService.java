@@ -18,6 +18,7 @@ import dev.guilherme.notelogic.estatistica.Estatisticas.Dia;
 import dev.guilherme.notelogic.estatistica.Estatisticas.FocoPorMateria;
 import dev.guilherme.notelogic.estatistica.Estatisticas.Hoje;
 import dev.guilherme.notelogic.materia.MateriaResponse;
+import dev.guilherme.notelogic.usuario.UsuarioAtual;
 
 @Service
 public class EstatisticaService {
@@ -27,24 +28,27 @@ public class EstatisticaService {
 
     private final EstatisticaConsultas consultas;
     private final Clock clock;
+    private final UsuarioAtual usuario;
 
-    public EstatisticaService(EstatisticaConsultas consultas, Clock clock) {
+    public EstatisticaService(EstatisticaConsultas consultas, Clock clock, UsuarioAtual usuario) {
         this.consultas = consultas;
         this.clock = clock;
+        this.usuario = usuario;
     }
 
     /** Os últimos {@code dias} dias, terminando hoje. Uma transação só: todos os números vêm do mesmo "retrato". */
     @Transactional(readOnly = true)
     public Estatisticas calcular(int dias) {
+        Long usuarioId = usuario.id();
         ZoneId fuso = clock.getZone();
         LocalDate hoje = LocalDate.now(clock);
         LocalDate primeiroDia = hoje.minusDays(dias - 1L);
         Instant inicio = primeiroDia.atStartOfDay(fuso).toInstant();
         Instant fim = hoje.plusDays(1).atStartOfDay(fuso).toInstant();
 
-        Map<LocalDate, Long> foco = consultas.segundosDeFocoPorDia(inicio, fim, fuso);
-        Map<LocalDate, Long> tarefas = consultas.tarefasConcluidasPorDia(inicio, fim, fuso);
-        Map<LocalDate, RevisoesNoDia> revisoes = consultas.revisoesPorDia(inicio, fim, fuso);
+        Map<LocalDate, Long> foco = consultas.segundosDeFocoPorDia(usuarioId, inicio, fim, fuso);
+        Map<LocalDate, Long> tarefas = consultas.tarefasConcluidasPorDia(usuarioId, inicio, fim, fuso);
+        Map<LocalDate, RevisoesNoDia> revisoes = consultas.revisoesPorDia(usuarioId, inicio, fim, fuso);
 
         List<Dia> serie = new ArrayList<>();
         for (LocalDate d = primeiroDia; !d.isAfter(hoje); d = d.plusDays(1)) {
@@ -55,19 +59,19 @@ public class EstatisticaService {
 
         Dia deHoje = serie.getLast();
         Hoje resumoHoje = new Hoje(deHoje.minutosFocados(), deHoje.cartoesRevisados(), deHoje.tarefasConcluidas(),
-                consultas.cartoesParaRevisar(hoje));
+                consultas.cartoesParaRevisar(usuarioId, hoje));
 
-        List<FocoPorMateria> porMateria = consultas.segundosDeFocoPorMateria(inicio, fim).stream()
+        List<FocoPorMateria> porMateria = consultas.segundosDeFocoPorMateria(usuarioId, inicio, fim).stream()
                 .map(m -> new FocoPorMateria(new MateriaResponse(m.materiaId(), m.nome(), m.cor()),
                         m.segundos() / 60))
                 .toList();
 
-        return new Estatisticas(resumoHoje, sequencia(hoje, fuso), taxaDeAcerto(revisoes), serie, porMateria);
+        return new Estatisticas(resumoHoje, sequencia(usuarioId, hoje, fuso), taxaDeAcerto(revisoes), serie, porMateria);
     }
 
-    private int sequencia(LocalDate hoje, ZoneId fuso) {
+    private int sequencia(Long usuarioId, LocalDate hoje, ZoneId fuso) {
         Instant desde = hoje.minusDays(LIMITE_SEQUENCIA_DIAS).atStartOfDay(fuso).toInstant();
-        Set<LocalDate> estudados = new HashSet<>(consultas.diasComEstudo(desde, fuso));
+        Set<LocalDate> estudados = new HashSet<>(consultas.diasComEstudo(usuarioId, desde, fuso));
         return contarSequencia(estudados, hoje);
     }
 

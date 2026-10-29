@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import dev.guilherme.notelogic.erro.RecursoNaoEncontradoException;
 import dev.guilherme.notelogic.materia.Materia;
 import dev.guilherme.notelogic.materia.MateriaService;
+import dev.guilherme.notelogic.usuario.UsuarioAtual;
 
 @Service
 public class BaralhoService {
@@ -25,20 +26,22 @@ public class BaralhoService {
     private final CartaoRepository cartoes;
     private final MateriaService materias;
     private final Clock clock;
+    private final UsuarioAtual usuario;
 
     public BaralhoService(BaralhoRepository repository, CartaoRepository cartoes, MateriaService materias,
-            Clock clock) {
+            Clock clock, UsuarioAtual usuario) {
         this.repository = repository;
         this.cartoes = cartoes;
         this.materias = materias;
         this.clock = clock;
+        this.usuario = usuario;
     }
 
     /** Duas consultas no total, não importa quantos baralhos existam. */
     @Transactional(readOnly = true)
     public List<Resumo> listar(Long materiaId) {
         Map<Long, CartaoRepository.Contagem> contagens = contagens();
-        return repository.filtrar(materiaId).stream()
+        return repository.filtrar(usuario.id(), materiaId).stream()
                 .map(b -> resumir(b, contagens.get(b.getId())))
                 .toList();
     }
@@ -51,12 +54,13 @@ public class BaralhoService {
 
     @Transactional(readOnly = true)
     public Baralho buscar(Long id) {
-        return repository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Baralho", id));
+        return repository.findByIdAndUsuarioId(id, usuario.id())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Baralho", id));
     }
 
     @Transactional
     public Baralho criar(String nome, String descricao, Long materiaId) {
-        return repository.save(new Baralho(nome, descricao, materiaDe(materiaId)));
+        return repository.save(new Baralho(usuario.id(), nome, descricao, materiaDe(materiaId)));
     }
 
     @Transactional
@@ -72,7 +76,7 @@ public class BaralhoService {
     }
 
     private Map<Long, CartaoRepository.Contagem> contagens() {
-        return cartoes.contarPorBaralho(LocalDate.now(clock)).stream()
+        return cartoes.contarPorBaralho(usuario.id(), LocalDate.now(clock)).stream()
                 .collect(Collectors.toMap(CartaoRepository.Contagem::getBaralhoId, Function.identity()));
     }
 

@@ -41,37 +41,40 @@ public class EstatisticaConsultas {
     }
 
     /** Segundos de FOCO por dia. Sessões ainda em andamento não contam. */
-    public Map<LocalDate, Long> segundosDeFocoPorDia(Instant inicio, Instant fim, ZoneId fuso) {
+    public Map<LocalDate, Long> segundosDeFocoPorDia(Long usuarioId, Instant inicio, Instant fim, ZoneId fuso) {
         String sql = """
                 select %s as dia, sum(segundos_focados) as valor
                 from sessao_foco
-                where tipo = 'FOCO' and status <> 'EM_ANDAMENTO'
+                where usuario_id = :usuarioId and tipo = 'FOCO' and status <> 'EM_ANDAMENTO'
                   and iniciada_em >= :inicio and iniciada_em < :fim
                 group by 1
                 """.formatted(DIA.formatted("iniciada_em"));
-        return porDia(sql, inicio, fim, fuso);
+        return porDia(sql, usuarioId, inicio, fim, fuso);
     }
 
-    public Map<LocalDate, Long> tarefasConcluidasPorDia(Instant inicio, Instant fim, ZoneId fuso) {
+    public Map<LocalDate, Long> tarefasConcluidasPorDia(Long usuarioId, Instant inicio, Instant fim, ZoneId fuso) {
         String sql = """
                 select %s as dia, count(*) as valor
                 from tarefa
-                where concluida and concluida_em >= :inicio and concluida_em < :fim
+                where usuario_id = :usuarioId and concluida and concluida_em >= :inicio and concluida_em < :fim
                 group by 1
                 """.formatted(DIA.formatted("concluida_em"));
-        return porDia(sql, inicio, fim, fuso);
+        return porDia(sql, usuarioId, inicio, fim, fuso);
     }
 
-    public Map<LocalDate, RevisoesNoDia> revisoesPorDia(Instant inicio, Instant fim, ZoneId fuso) {
+    public Map<LocalDate, RevisoesNoDia> revisoesPorDia(Long usuarioId, Instant inicio, Instant fim, ZoneId fuso) {
         String sql = """
                 select %s as dia,
                        count(*) as total,
                        count(*) filter (where resposta in ('BOM', 'FACIL')) as acertos
-                from revisao
-                where respondida_em >= :inicio and respondida_em < :fim
+                from revisao r
+                join cartao c on c.id = r.cartao_id
+                join baralho b on b.id = c.baralho_id
+                where b.usuario_id = :usuarioId and r.respondida_em >= :inicio and r.respondida_em < :fim
                 group by 1
-                """.formatted(DIA.formatted("respondida_em"));
+                """.formatted(DIA.formatted("r.respondida_em"));
         return jdbc.sql(sql)
+                .param("usuarioId", usuarioId)
                 .param("fuso", fuso.getId())
                 .param("inicio", utc(inicio))
                 .param("fim", utc(fim))
@@ -81,17 +84,18 @@ public class EstatisticaConsultas {
                 .collect(Collectors.toMap(RevisoesNoDia::dia, r -> r));
     }
 
-    public List<MinutosPorMateria> segundosDeFocoPorMateria(Instant inicio, Instant fim) {
+    public List<MinutosPorMateria> segundosDeFocoPorMateria(Long usuarioId, Instant inicio, Instant fim) {
         return jdbc.sql("""
                 select m.id, m.nome, m.cor, sum(s.segundos_focados) as segundos
                 from sessao_foco s
                 join materia m on m.id = s.materia_id
-                where s.tipo = 'FOCO' and s.status <> 'EM_ANDAMENTO'
+                where s.usuario_id = :usuarioId and s.tipo = 'FOCO' and s.status <> 'EM_ANDAMENTO'
                   and s.iniciada_em >= :inicio and s.iniciada_em < :fim
                 group by m.id, m.nome, m.cor
                 having sum(s.segundos_focados) >= 60
                 order by segundos desc
                 """)
+                .param("usuarioId", usuarioId)
                 .param("inicio", utc(inicio))
                 .param("fim", utc(fim))
                 .query((rs, n) -> new MinutosPorMateria(rs.getLong("id"), rs.getString("nome"), rs.getString("cor"),
@@ -100,29 +104,39 @@ public class EstatisticaConsultas {
     }
 
     /** Dias com qualquer atividade de estudo (foco ou revisão), do mais recente para o mais antigo. */
-    public List<LocalDate> diasComEstudo(Instant desde, ZoneId fuso) {
+    public List<LocalDate> diasComEstudo(Long usuarioId, Instant desde, ZoneId fuso) {
         return jdbc.sql("""
                 select %s as dia from sessao_foco
-                where tipo = 'FOCO' and status <> 'EM_ANDAMENTO' and iniciada_em >= :desde
+                where usuario_id = :usuarioId and tipo = 'FOCO' and status <> 'EM_ANDAMENTO' and iniciada_em >= :desde
                 union
-                select %s as dia from revisao where respondida_em >= :desde
+                select %s as dia from revisao r
+                join cartao c on c.id = r.cartao_id
+                join baralho b on b.id = c.baralho_id
+                where b.usuario_id = :usuarioId and r.respondida_em >= :desde
                 order by dia desc
-                """.formatted(DIA.formatted("iniciada_em"), DIA.formatted("respondida_em")))
+                """.formatted(DIA.formatted("iniciada_em"), DIA.formatted("r.respondida_em")))
+                .param("usuarioId", usuarioId)
                 .param("fuso", fuso.getId())
                 .param("desde", utc(desde))
                 .query(LocalDate.class)
                 .list();
     }
 
-    public long cartoesParaRevisar(LocalDate hoje) {
-        return jdbc.sql("select count(*) from cartao where proxima_revisao <= :hoje")
+    public long cartoesParaRevisar(Long usuarioId, LocalDate hoje) {
+        return jdbc.sql("""
+                select count(*) from cartao c
+                join baralho b on b.id = c.baralho_id
+                where b.usuario_id = :usuarioId and c.proxima_revisao <= :hoje
+                """)
+                .param("usuarioId", usuarioId)
                 .param("hoje", hoje)
                 .query(Long.class)
                 .single();
     }
 
-    private Map<LocalDate, Long> porDia(String sql, Instant inicio, Instant fim, ZoneId fuso) {
+    private Map<LocalDate, Long> porDia(String sql, Long usuarioId, Instant inicio, Instant fim, ZoneId fuso) {
         return jdbc.sql(sql)
+                .param("usuarioId", usuarioId)
                 .param("fuso", fuso.getId())
                 .param("inicio", utc(inicio))
                 .param("fim", utc(fim))

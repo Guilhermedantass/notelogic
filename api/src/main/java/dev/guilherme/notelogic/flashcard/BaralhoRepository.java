@@ -10,10 +10,13 @@ import org.springframework.data.jpa.repository.Query;
 public interface BaralhoRepository extends JpaRepository<Baralho, Long> {
 
     @EntityGraph(attributePaths = "materia")
-    @Query("select b from Baralho b where (:materiaId is null or b.materia.id = :materiaId) order by lower(b.nome)")
-    List<Baralho> filtrar(Long materiaId);
+    @Query("""
+            select b from Baralho b
+            where b.usuarioId = :usuarioId and (:materiaId is null or b.materia.id = :materiaId)
+            order by lower(b.nome)
+            """)
+    List<Baralho> filtrar(Long usuarioId, Long materiaId);
 
-    @Override
     @EntityGraph(attributePaths = "materia")
-    Optional<Baralho> findById(Long id);
+    Optional<Baralho> findByIdAndUsuarioId(Long id, Long usuarioId);
 }

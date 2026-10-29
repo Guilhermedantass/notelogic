@@ -22,6 +22,10 @@ public class Tarefa {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Dono do dado. Só o id (e não um @ManyToOne Usuario): nenhuma tela precisa carregar o usuário junto. */
+    @Column(name = "usuario_id", nullable = false, updatable = false)
+    private Long usuarioId;
+
     @Column(nullable = false, length = 200)
     private String titulo;
 
@@ -53,7 +57,9 @@ public class Tarefa {
         // exigido pelo JPA
     }
 
-    public Tarefa(String titulo, String descricao, Materia materia, LocalDate prazo, Prioridade prioridade) {
+    public Tarefa(Long usuarioId, String titulo, String descricao, Materia materia, LocalDate prazo,
+            Prioridade prioridade) {
+        this.usuarioId = usuarioId;
         this.criadaEm = Instant.now();
         this.concluida = false;
         editar(titulo, descricao, materia, prazo, prioridade);
@@ -79,6 +85,10 @@ public class Tarefa {
 
     public Long getId() {
         return id;
+    }
+
+    public Long getUsuarioId() {
+        return usuarioId;
     }
 
     public String getTitulo() {

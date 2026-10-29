@@ -1,22 +1,27 @@
+import { provideHttpClient } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
-import { App } from './app';
+import { Shell } from './layout/shell';
 
-describe('App', () => {
+describe('Shell', () => {
   beforeEach(async () => {
+    localStorage.setItem('notelogic.usuario', JSON.stringify({ id: 1, nome: 'Ana', email: 'ana@teste.dev' }));
     await TestBed.configureTestingModule({
-      imports: [App],
-      providers: [provideRouter([])],
+      imports: [Shell],
+      providers: [provideRouter([]), provideHttpClient()],
     }).compileComponents();
   });
 
-  it('mostra a barra lateral com a marca e a navegação', async () => {
-    const fixture = TestBed.createComponent(App);
+  afterEach(() => localStorage.clear());
+
+  it('mostra a marca, a navegação e quem está logado', async () => {
+    const fixture = TestBed.createComponent(Shell);
     await fixture.whenStable();
     const html = fixture.nativeElement as HTMLElement;
 
     expect(html.querySelector('.marca')?.textContent).toContain('notelogic');
     expect(html.querySelectorAll('nav a').length).toBe(5);
+    expect(html.querySelector('.conta')?.textContent).toContain('Ana');
   });
 });

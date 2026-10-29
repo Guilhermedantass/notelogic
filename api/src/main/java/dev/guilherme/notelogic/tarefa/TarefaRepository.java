@@ -16,13 +16,13 @@ public interface TarefaRepository extends JpaRepository<Tarefa, Long> {
     @EntityGraph(attributePaths = "materia")
     @Query("""
             select t from Tarefa t
-            where (:materiaId is null or t.materia.id = :materiaId)
+            where t.usuarioId = :usuarioId
+              and (:materiaId is null or t.materia.id = :materiaId)
               and (:concluida is null or t.concluida = :concluida)
             order by t.concluida, t.prazo asc nulls last, t.id
             """)
-    List<Tarefa> filtrar(Long materiaId, Boolean concluida);
+    List<Tarefa> filtrar(Long usuarioId, Long materiaId, Boolean concluida);
 
-    @Override
     @EntityGraph(attributePaths = "materia")
-    Optional<Tarefa> findById(Long id);
+    Optional<Tarefa> findByIdAndUsuarioId(Long id, Long usuarioId);
 }
