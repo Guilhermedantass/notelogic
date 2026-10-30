@@ -1,15 +1,12 @@
 package dev.guilherme.notelogic.recorrencia;
 
-import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.EnumSet;
-import java.util.Set;
 
 import dev.guilherme.notelogic.materia.Materia;
 import dev.guilherme.notelogic.tarefa.Prioridade;
 import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -49,24 +46,9 @@ public class Recorrencia {
 
     // ---- a regra ----
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 15)
-    private TipoRecorrencia tipo;
-
-    @Convert(converter = DiasDaSemanaConverter.class)
-    @Column(length = 60)
-    private Set<DayOfWeek> diasSemana = EnumSet.noneOf(DayOfWeek.class);
-
-    private Integer intervaloDias;
-
-    private Integer diaDoMes;
-
-    @Column(nullable = false)
-    private LocalDate inicio;
-
-    private LocalDate fim;
-
-    private Integer maxOcorrencias;
+    /** Colunas tipo, dias_semana, intervalo_dias, dia_do_mes, inicio, fim e max_ocorrencias desta tabela. */
+    @Embedded
+    private RegraRecorrencia regra;
 
     /** false = "expira" (padrão): não fez no dia, passou. true = "acumula": vira atrasada. */
     @Column(nullable = false)
@@ -95,19 +77,13 @@ public class Recorrencia {
         this.descricao = descricao;
         this.materia = materia;
         this.prioridade = prioridade != null ? prioridade : Prioridade.MEDIA;
-        this.tipo = regra.tipo();
-        this.diasSemana = regra.diasSemana().isEmpty() ? EnumSet.noneOf(DayOfWeek.class) : EnumSet.copyOf(regra.diasSemana());
-        this.intervaloDias = regra.intervaloDias();
-        this.diaDoMes = regra.diaDoMes();
-        this.inicio = regra.inicio();
-        this.fim = regra.fim();
-        this.maxOcorrencias = regra.maxOcorrencias();
+        this.regra = regra;
         this.acumula = acumula;
     }
 
     /** A regra para de valer depois de {@code ultimoDia}. */
     public void encerrarEm(LocalDate ultimoDia) {
-        this.fim = ultimoDia;
+        this.regra = regra.comFim(ultimoDia);
     }
 
     public void marcarGeradaAte(LocalDate dia) {
@@ -115,11 +91,11 @@ public class Recorrencia {
     }
 
     public RegraRecorrencia regra() {
-        return new RegraRecorrencia(tipo, diasSemana, intervaloDias, diaDoMes, inicio, fim, maxOcorrencias);
+        return regra;
     }
 
     public boolean encerrada(LocalDate hoje) {
-        return fim != null && fim.isBefore(hoje);
+        return regra.fim() != null && regra.fim().isBefore(hoje);
     }
 
     public Long getId() {
