@@ -1,4 +1,4 @@
-import { Component, input, output, signal } from '@angular/core';
+import { Component, input, OnInit, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import {
@@ -23,10 +23,12 @@ type Repetir = 'NAO' | TipoRecorrencia;
   templateUrl: './nova-tarefa.html',
   styleUrl: './nova-tarefa.scss',
 })
-export class NovaTarefa {
+export class NovaTarefa implements OnInit {
   readonly materias = input<Materia[]>([]);
   /** Se a lista está filtrada por uma matéria, a tarefa nova já nasce nela. */
   readonly materiaPadrao = input<number | null>(null);
+  /** Na tela Início, a tarefa nova já nasce para hoje. */
+  readonly prazoPadrao = input<string | null>(null);
 
   readonly criar = output<TarefaRequest>();
   readonly criarRecorrente = output<RecorrenciaRequest>();
@@ -46,6 +48,10 @@ export class NovaTarefa {
   protected intervaloDias = 2;
   protected diaDoMes = new Date().getDate();
   protected acumula = false;
+
+  ngOnInit(): void {
+    this.prazo = this.prazoPadrao();
+  }
 
   protected alternarDia(dia: DiaDaSemana): void {
     this.diasSemana.update((atual) =>
@@ -88,7 +94,7 @@ export class NovaTarefa {
   private limpar(): void {
     this.titulo.set('');
     this.materiaId = null;
-    this.prazo = null;
+    this.prazo = this.prazoPadrao();
     this.prioridade = 'MEDIA';
     this.repetir.set('NAO');
     this.acumula = false;

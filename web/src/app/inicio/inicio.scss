@@ -1,0 +1,111 @@
+.cabecalho {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.contador {
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--violeta-suave);
+  color: var(--violeta-texto);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+// Tarefas no centro, agenda de hoje ao lado; as datas importantes embaixo, na largura toda
+.grade {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+  grid-template-areas:
+    'tarefas agenda'
+    'datas datas';
+  gap: 28px 40px;
+  align-items: start;
+  max-width: 1100px;
+}
+
+.tarefas {
+  grid-area: tarefas;
+}
+
+.agenda {
+  grid-area: agenda;
+}
+
+.datas {
+  grid-area: datas;
+}
+
+@media (max-width: 1000px) {
+  .grade {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'agenda'
+      'tarefas'
+      'datas';
+  }
+}
+
+.titulo-secao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+
+  h2 {
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+}
+
+.ver {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--violeta-texto);
+
+  .icone {
+    font-size: 16px;
+  }
+}
+
+.grupo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0 4px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--texto-suave);
+
+  span {
+    font-weight: 500;
+  }
+
+  &.atrasadas {
+    color: var(--vermelho);
+  }
+
+  &.hoje {
+    color: var(--violeta-texto);
+  }
+}
+
+.tudo-feito {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 4px;
+  color: var(--texto-suave);
+
+  .icone {
+    color: var(--violeta);
+  }
+}

@@ -1,6 +1,6 @@
 <header class="cabecalho">
   <div>
-    <h1 class="titulo-pagina">Hoje</h1>
+    <h1 class="titulo-pagina">Tarefas</h1>
     <p class="subtitulo-pagina">{{ dataExtensa }}</p>
   </div>
   @if (listaPendentes().length > 0) {
@@ -95,10 +95,5 @@
     }
   </section>
 
-  <aside class="lateral">
-    @if (resumo.hasValue()) {
-      <app-resumo-do-dia [resumo]="resumo.value()" />
-    }
-    <img class="ilustracao" src="img/tarefas.svg" alt="" />
-  </aside>
+  <img class="ilustracao" src="img/tarefas.svg" alt="" />
 </div>

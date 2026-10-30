@@ -1,0 +1,81 @@
+<header class="cabecalho">
+  <div>
+    <h1 class="titulo-pagina">Início</h1>
+    <p class="subtitulo-pagina">{{ dataExtensa }}</p>
+  </div>
+  @if (atrasadas().length + deHoje().length > 0) {
+    <span class="contador">
+      {{ atrasadas().length + deHoje().length }}
+      {{ atrasadas().length + deHoje().length === 1 ? 'tarefa para hoje' : 'tarefas para hoje' }}
+    </span>
+  }
+</header>
+
+@if (erro() ?? erroDeCarga(); as mensagem) {
+  <div class="aviso-erro" role="alert">
+    <span class="icone">error</span>{{ mensagem }}
+    @if (erro()) {
+      <button (click)="erro.set(null)" aria-label="Fechar"><span class="icone">close</span></button>
+    }
+  </div>
+}
+
+<div class="grade">
+  <section class="tarefas">
+    <header class="titulo-secao">
+      <h2>Tarefas do dia</h2>
+      <a routerLink="/tarefas" class="ver"
+        >Todas as tarefas <span class="icone">arrow_forward</span></a
+      >
+    </header>
+
+    @if (atrasadas().length > 0) {
+      <h3 class="grupo atrasadas">
+        Atrasadas <span>{{ atrasadas().length }}</span>
+      </h3>
+      @for (t of atrasadas(); track t.id) {
+        <app-tarefa-item
+          [tarefa]="t"
+          [hoje]="hoje"
+          [somenteConcluir]="true"
+          (concluir)="concluir($event)"
+          (reabrir)="reabrir($event)"
+        />
+      }
+    }
+
+    @if (deHoje().length > 0) {
+      <h3 class="grupo hoje">
+        Para hoje <span>{{ deHoje().length }}</span>
+      </h3>
+      @for (t of deHoje(); track t.id) {
+        <app-tarefa-item
+          [tarefa]="t"
+          [hoje]="hoje"
+          [somenteConcluir]="true"
+          (concluir)="concluir($event)"
+          (reabrir)="reabrir($event)"
+        />
+      }
+    }
+
+    @if (atrasadas().length + deHoje().length === 0 && !pendentes.isLoading() && !erroDeCarga()) {
+      <p class="tudo-feito">
+        <span class="icone">celebration</span>
+        Nada para hoje. Aproveite, ou adicione a próxima.
+      </p>
+    }
+
+    <app-nova-tarefa
+      [materias]="listaMaterias()"
+      [prazoPadrao]="hoje"
+      (criar)="adicionar($event)"
+      (criarRecorrente)="adicionarRecorrente($event)"
+    />
+  </section>
+
+  @if (resumo.hasValue()) {
+    <app-agenda-de-hoje class="agenda" [eventos]="resumo.value().agenda" />
+    <app-datas-importantes class="datas" [datas]="resumo.value().importantes" />
+  }
+</div>

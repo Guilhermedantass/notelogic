@@ -16,7 +16,7 @@ Em ordem de prioridade, por bloco. Cada bloco é quebrado em partes pequenas, ca
 | A1 | ✅ Evento | Prova, aula, treino, compromisso: data, horário ou dia inteiro |
 | A2 | ✅ Eventos que se repetem | Reaproveita a regra das tarefas recorrentes; exceções para "só esta" |
 | A3 | ✅ Tela Agenda | Mês, semana e dia, com eventos e tarefas com prazo |
-| A4 | ✅ Hoje vira o resumo do dia | Agenda de hoje, próximas datas importantes (30 dias) e as tarefas |
+| A4 | ✅ Tela Início | Tarefas do dia, agenda de hoje e próximas datas importantes (30 dias); a antiga "Hoje" vira "Tarefas" |
 | A5 | *Depois* | Lembretes (depende do P2), pausar rotina (férias), prova cria tarefa de revisão, pomodoros na semana, `.ics` |
 
 ### D. Deploy e CI (ver [seção 2](#2-deploy))
@@ -153,11 +153,14 @@ próximo passo de aprendizado.
   Arrastar uma tarefa muda o prazo dela.
 - **Tarefas com prazo** aparecem todas na faixa de dia inteiro, com visual próprio e check para concluir ali.
 
-### Agenda — A4: Hoje como resumo do dia (30/10/2026)
+### Agenda — A4: tela Início (30/10/2026)
 
-- **Prova não vai para a lista de tarefas:** é um compromisso, fica na agenda. A tela Hoje junta os dois.
-- **Três blocos:** agenda de hoje (eventos em ordem de horário), próximas datas importantes e as tarefas
-  (atrasadas e de hoje, como já é).
+- **Prova não vai para a lista de tarefas:** é um compromisso, fica na agenda. A tela **Início** junta os dois.
+- **Início** é a tela que abre depois do login, só com o que é do dia: as tarefas **atrasadas e de hoje** no centro
+  (dá para concluir e adicionar, já com prazo hoje; editar e apagar ficam em Tarefas), a **agenda de hoje** ao lado e
+  as **próximas datas importantes** embaixo.
+- **Tarefas** é a antiga tela "Hoje", sem mudanças: a lista completa (atrasadas, hoje, próximas, sem prazo,
+  concluídas). O endereço `/hoje` leva para o Início.
 - **Próximas datas importantes:** os próximos **30 dias**, com contagem ("em 4 dias"). Entram os eventos de
   categorias com destaque e as tarefas de prioridade **alta** com prazo no período.
 

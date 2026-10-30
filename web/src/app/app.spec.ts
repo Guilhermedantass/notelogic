@@ -21,7 +21,7 @@ describe('Shell', () => {
     const html = fixture.nativeElement as HTMLElement;
 
     expect(html.querySelector('.marca')?.textContent).toContain('notelogic');
-    expect(html.querySelectorAll('nav a').length).toBe(6);
+    expect(html.querySelectorAll('nav a').length).toBe(7);
     expect(html.querySelector('.conta')?.textContent).toContain('Ana');
   });
 });

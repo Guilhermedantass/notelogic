@@ -11,4 +11,4 @@ export const exigeLogin: CanActivateFn = (_rota, estado) => {
 
 /** O contrário: quem já está logado não precisa ver a tela de entrar. */
 export const soDeslogado: CanActivateFn = () =>
-  inject(AuthService).logado() ? inject(Router).createUrlTree(['/hoje']) : true;
+  inject(AuthService).logado() ? inject(Router).createUrlTree(['/inicio']) : true;

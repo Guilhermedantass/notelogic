@@ -11,7 +11,7 @@ import { Logo } from './logo';
   imports: [RouterLink, RouterLinkActive, Logo],
   template: `
     <aside class="sidebar">
-      <a routerLink="/hoje" class="marca" aria-label="NoteLogic, ir para Hoje">
+      <a routerLink="/inicio" class="marca" aria-label="NoteLogic, ir para o início">
         <app-logo />
       </a>
 
@@ -89,7 +89,9 @@ import { Logo } from './logo';
       border-radius: 10px;
       font-weight: 500;
       color: var(--texto-suave);
-      transition: background 0.15s, color 0.15s;
+      transition:
+        background 0.15s,
+        color 0.15s;
 
       &:hover {
         color: var(--texto);
@@ -170,7 +172,9 @@ import { Logo } from './logo';
         padding: 5px 0;
         border-radius: 7px;
         color: var(--texto-suave);
-        transition: background 0.15s, color 0.15s;
+        transition:
+          background 0.15s,
+          color 0.15s;
 
         .icone {
           font-size: 18px;
@@ -233,7 +237,8 @@ export class Sidebar {
   protected readonly auth = inject(AuthService);
 
   protected readonly itens = [
-    { rota: '/hoje', icone: 'today', rotulo: 'Hoje' },
+    { rota: '/inicio', icone: 'home', rotulo: 'Início' },
+    { rota: '/tarefas', icone: 'checklist', rotulo: 'Tarefas' },
     { rota: '/agenda', icone: 'calendar_month', rotulo: 'Agenda' },
     { rota: '/flashcards', icone: 'style', rotulo: 'Flashcards' },
     { rota: '/pomodoro', icone: 'timer', rotulo: 'Pomodoro' },

@@ -44,7 +44,7 @@ export class Acesso {
       : this.auth.entrar(this.email, this.senha);
 
     acao.subscribe({
-      next: () => this.router.navigateByUrl(this.voltar() || '/hoje'),
+      next: () => this.router.navigateByUrl(this.voltar() || '/inicio'),
       error: (e) => {
         this.erro.set(mensagemDeErro(e));
         this.enviando.set(false);

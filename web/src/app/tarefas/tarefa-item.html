@@ -10,7 +10,7 @@
       <span class="icone">check</span>
     </button>
 
-    <div class="corpo" (dblclick)="abrirEdicao()">
+    <div class="corpo" (dblclick)="!somenteConcluir() && abrirEdicao()">
       <span class="titulo">
         @if (t.prioridade === 'ALTA') {
           <span class="icone prioridade" title="Prioridade alta">priority_high</span>
@@ -27,11 +27,16 @@
           </span>
         }
         @if (t.recorrencia; as r) {
-          <span class="repete" [title]="r.acumula ? 'Se não fizer, vira atrasada' : 'Se não fizer no dia, expira'">
+          <span
+            class="repete"
+            [title]="r.acumula ? 'Se não fizer, vira atrasada' : 'Se não fizer no dia, expira'"
+          >
             <span class="icone">repeat</span>{{ r.descricao }}
             @if (constancia(); as c) {
               @if (c.esperadas > 0) {
-                <span class="constancia" title="Feitas de esperadas, desde o início">· {{ c.feitas }}/{{ c.esperadas }}</span>
+                <span class="constancia" title="Feitas de esperadas, desde o início"
+                  >· {{ c.feitas }}/{{ c.esperadas }}</span
+                >
               }
             }
           </span>
@@ -42,21 +47,25 @@
       </div>
     </div>
 
-    <div class="acoes">
-      <button class="botao-icone" (click)="abrirEdicao()" aria-label="Editar">
-        <span class="icone">edit</span>
-      </button>
-      <button class="botao-icone perigo" (click)="pedirRemocao()" aria-label="Apagar">
-        <span class="icone">delete</span>
-      </button>
-    </div>
+    @if (!somenteConcluir()) {
+      <div class="acoes">
+        <button class="botao-icone" (click)="abrirEdicao()" aria-label="Editar">
+          <span class="icone">edit</span>
+        </button>
+        <button class="botao-icone perigo" (click)="pedirRemocao()" aria-label="Apagar">
+          <span class="icone">delete</span>
+        </button>
+      </div>
+    }
   </div>
 
   @if (confirmandoRemocao()) {
     <div class="escopo" role="group" aria-label="O que apagar">
       <span>Esta tarefa se repete. Apagar:</span>
       <button class="botao secundario" (click)="removerCom('so-esta')">Só esta</button>
-      <button class="botao perigo-forte" (click)="removerCom('proximas')">Esta e as próximas</button>
+      <button class="botao perigo-forte" (click)="removerCom('proximas')">
+        Esta e as próximas
+      </button>
       <button class="botao-icone" (click)="confirmandoRemocao.set(false)" aria-label="Cancelar">
         <span class="icone">close</span>
       </button>
@@ -64,7 +73,13 @@
   }
 } @else {
   <form class="edicao" (ngSubmit)="confirmarEdicao()">
-    <input class="campo titulo-edicao" name="titulo" [(ngModel)]="rascunho.titulo" required autofocus />
+    <input
+      class="campo titulo-edicao"
+      name="titulo"
+      [(ngModel)]="rascunho.titulo"
+      required
+      autofocus
+    />
     <textarea
       class="campo"
       name="descricao"
@@ -88,11 +103,15 @@
         }
       </select>
       <div class="botoes">
-        <button type="button" class="botao secundario" (click)="editando.set(false)">Cancelar</button>
+        <button type="button" class="botao secundario" (click)="editando.set(false)">
+          Cancelar
+        </button>
         @if (repete()) {
           <!-- tarefa que se repete: a pergunta já vem nos próprios botões -->
           <button type="submit" class="botao secundario">Salvar só esta</button>
-          <button type="button" class="botao" (click)="confirmarEdicao('proximas')">Esta e as próximas</button>
+          <button type="button" class="botao" (click)="confirmarEdicao('proximas')">
+            Esta e as próximas
+          </button>
         } @else {
           <button type="submit" class="botao">Salvar</button>
         }

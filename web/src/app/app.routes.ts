@@ -25,12 +25,19 @@ export const routes: Routes = [
     component: Shell,
     canActivate: [exigeLogin],
     children: [
-      { path: '', pathMatch: 'full', redirectTo: 'hoje' },
+      { path: '', pathMatch: 'full', redirectTo: 'inicio' },
       {
-        path: 'hoje',
-        title: 'Hoje · NoteLogic',
-        loadComponent: () => import('./tarefas/hoje').then((m) => m.Hoje),
+        path: 'inicio',
+        title: 'Início · NoteLogic',
+        loadComponent: () => import('./inicio/inicio').then((m) => m.Inicio),
       },
+      {
+        path: 'tarefas',
+        title: 'Tarefas · NoteLogic',
+        loadComponent: () => import('./tarefas/tarefas').then((m) => m.Tarefas),
+      },
+      // a lista de tarefas se chamava "Hoje": quem tinha o endereço salvo cai na tela inicial
+      { path: 'hoje', redirectTo: 'inicio' },
       {
         path: 'agenda',
         title: 'Agenda · NoteLogic',
@@ -68,5 +75,5 @@ export const routes: Routes = [
       },
     ],
   },
-  { path: '**', redirectTo: 'hoje' },
+  { path: '**', redirectTo: 'inicio' },
 ];

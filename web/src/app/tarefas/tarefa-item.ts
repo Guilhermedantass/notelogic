@@ -20,6 +20,8 @@ export class TarefaItem {
   readonly hoje = input.required<string>();
   readonly materias = input<Materia[]>([]);
   /** Constância da regra desta tarefa (se ela se repete): feitas de esperadas. */
+  /** Na tela Início: só concluir (editar e apagar ficam na tela Tarefas). */
+  readonly somenteConcluir = input(false);
   readonly constancia = input<{ feitas: number; esperadas: number } | null>(null);
 
   readonly concluir = output<Tarefa>();
