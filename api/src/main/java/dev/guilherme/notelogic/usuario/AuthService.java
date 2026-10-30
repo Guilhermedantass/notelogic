@@ -4,6 +4,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import dev.guilherme.notelogic.agenda.CategoriasPadrao;
 import dev.guilherme.notelogic.erro.ConflitoException;
 import dev.guilherme.notelogic.erro.CredenciaisInvalidasException;
 import dev.guilherme.notelogic.erro.RecursoNaoEncontradoException;
@@ -16,17 +17,19 @@ public class AuthService {
     private final TokenService tokens;
     private final AdocaoDeDadosAntigos adocao;
     private final UsuarioAtual atual;
+    private final CategoriasPadrao categoriasPadrao;
 
     /** Hash de uma senha qualquer, usado quando o e-mail não existe (ver entrar). */
     private final String hashFalso;
 
     public AuthService(UsuarioRepository usuarios, PasswordEncoder encoder, TokenService tokens,
-            AdocaoDeDadosAntigos adocao, UsuarioAtual atual) {
+            AdocaoDeDadosAntigos adocao, UsuarioAtual atual, CategoriasPadrao categoriasPadrao) {
         this.usuarios = usuarios;
         this.encoder = encoder;
         this.tokens = tokens;
         this.adocao = adocao;
         this.atual = atual;
+        this.categoriasPadrao = categoriasPadrao;
         this.hashFalso = encoder.encode("senha-que-ninguem-usa");
     }
 
@@ -40,6 +43,7 @@ public class AuthService {
         if (usuarios.count() == 1) {
             adocao.adotar(usuario.getId());
         }
+        categoriasPadrao.criarPara(usuario.getId());
         return sessao(usuario);
     }
 

@@ -58,6 +58,17 @@ class AuthControllerTests {
     }
 
     @Test
+    void cadastroJaCriaAsCategoriasDaAgenda() throws Exception {
+        String token = token(cadastrar("Ana", "ana@teste.dev", "senha-forte-123"));
+
+        mvc.perform(get("/api/agenda/categorias").header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(4))
+                .andExpect(jsonPath("$[?(@.nome == 'Prova')].destaque").value(true))
+                .andExpect(jsonPath("$[?(@.nome == 'Treino')].destaque").value(false));
+    }
+
+    @Test
     void semTokenOuComTokenAdulteradoDa401() throws Exception {
         String token = token(cadastrar("Ana", "ana@teste.dev", "senha-forte-123"));
 
