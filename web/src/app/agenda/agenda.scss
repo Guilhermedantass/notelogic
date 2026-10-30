@@ -1,0 +1,90 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  // a agenda ocupa a altura da tela (o padding do .conteudo do shell é 48px em cima e embaixo)
+  height: calc(100vh - 96px);
+  min-height: 560px;
+}
+
+.cabecalho {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.acoes {
+  display: flex;
+  gap: 8px;
+}
+
+.barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.navegacao {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.visoes {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+
+  button {
+    padding: 5px 14px;
+    border-radius: 7px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--texto-suave);
+
+    &.ativo {
+      background: var(--fundo);
+      color: var(--violeta-texto);
+      box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+    }
+  }
+}
+
+.calendario {
+  flex: 1;
+  min-height: 0;
+}
+
+.pergunta {
+  margin-bottom: 14px;
+  color: var(--texto-suave);
+}
+
+.escopos {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  .botao {
+    justify-content: center;
+  }
+}
+
+.nota {
+  margin-top: 12px;
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+}
+
+@media (max-width: 760px) {
+  :host {
+    height: calc(100vh - 124px);
+  }
+}

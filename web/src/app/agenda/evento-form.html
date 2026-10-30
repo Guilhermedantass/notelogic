@@ -1,0 +1,225 @@
+<app-modal [titulo]="editando() ? 'Editar evento' : 'Novo evento'" (fechar)="fechar.emit()">
+  <form class="form" (ngSubmit)="enviar()">
+    <input
+      class="campo titulo"
+      name="titulo"
+      placeholder="Título (ex.: Prova de Grafos, Treino)"
+      autocomplete="off"
+      required
+      maxlength="200"
+      [(ngModel)]="titulo"
+    />
+
+    <div class="linha">
+      <select class="campo" name="categoria" [(ngModel)]="categoriaId" aria-label="Categoria">
+        <option [ngValue]="null">Sem categoria</option>
+        @for (c of categorias(); track c.id) {
+          <option [ngValue]="c.id">{{ c.nome }}</option>
+        }
+      </select>
+      <select class="campo" name="materia" [(ngModel)]="materiaId" aria-label="Matéria">
+        <option [ngValue]="null">Sem matéria</option>
+        @for (m of materias(); track m.id) {
+          <option [ngValue]="m.id">{{ m.nome }}</option>
+        }
+      </select>
+    </div>
+
+    <fieldset class="quando">
+      <legend>Quando</legend>
+      <div class="linha">
+        <input
+          class="campo"
+          type="date"
+          name="dataInicio"
+          required
+          [(ngModel)]="dataInicio"
+          aria-label="Data"
+        />
+        @if (variosDias()) {
+          <span class="ate">até</span>
+          <input
+            class="campo"
+            type="date"
+            name="dataFim"
+            [min]="dataInicio"
+            [(ngModel)]="dataFim"
+            aria-label="Até"
+          />
+        }
+      </div>
+      @if (!diaInteiro()) {
+        <div class="linha">
+          <input
+            class="campo"
+            type="time"
+            name="horaInicio"
+            required
+            [(ngModel)]="horaInicio"
+            aria-label="Começa às"
+          />
+          <span class="ate">até</span>
+          <input
+            class="campo"
+            type="time"
+            name="horaFim"
+            [(ngModel)]="horaFim"
+            aria-label="Termina às (opcional)"
+          />
+          <span class="dica">fim opcional</span>
+        </div>
+      }
+      <div class="linha opcoes">
+        <label>
+          <input
+            type="checkbox"
+            name="diaInteiro"
+            [ngModel]="diaInteiro()"
+            (ngModelChange)="diaInteiro.set($event)"
+          />
+          Dia inteiro
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            name="variosDias"
+            [ngModel]="variosDias()"
+            (ngModelChange)="alternarVariosDias($event)"
+          />
+          Vários dias
+        </label>
+      </div>
+    </fieldset>
+
+    @if (!variosDias()) {
+      <fieldset class="repetir">
+        <legend><span class="icone">repeat</span> Repetir</legend>
+        <select
+          class="campo"
+          name="repetir"
+          [ngModel]="repetir()"
+          (ngModelChange)="repetir.set($event)"
+        >
+          <option ngValue="NAO">Não repete</option>
+          <option ngValue="DIARIA">Todo dia</option>
+          <option ngValue="DIAS_UTEIS">Dias úteis (seg a sex)</option>
+          <option ngValue="SEMANAL">Dias da semana…</option>
+          <option ngValue="A_CADA_N_DIAS">A cada N dias…</option>
+          <option ngValue="MENSAL">Todo mês…</option>
+        </select>
+
+        @switch (repetir()) {
+          @case ('SEMANAL') {
+            <div class="dias" role="group" aria-label="Dias da semana">
+              @for (d of dias; track d.valor) {
+                <button
+                  type="button"
+                  class="dia"
+                  [class.marcado]="diasSemana().includes(d.valor)"
+                  [attr.aria-pressed]="diasSemana().includes(d.valor)"
+                  [attr.aria-label]="d.nome"
+                  [title]="d.nome"
+                  (click)="alternarDia(d.valor)"
+                >
+                  {{ d.letra }}
+                </button>
+              }
+            </div>
+          }
+          @case ('A_CADA_N_DIAS') {
+            <label class="numero">
+              A cada
+              <input
+                class="campo"
+                type="number"
+                name="intervalo"
+                min="1"
+                max="365"
+                [(ngModel)]="intervaloDias"
+              />
+              dias
+            </label>
+          }
+          @case ('MENSAL') {
+            <label class="numero">
+              Todo dia
+              <input
+                class="campo"
+                type="number"
+                name="diaDoMes"
+                min="1"
+                max="31"
+                [(ngModel)]="diaDoMes"
+              />
+              do mês
+            </label>
+          }
+        }
+
+        @if (repetir() !== 'NAO') {
+          <div class="linha termina">
+            <span>Termina</span>
+            <select
+              class="campo"
+              name="termina"
+              [ngModel]="termina()"
+              (ngModelChange)="termina.set($event)"
+            >
+              <option ngValue="NUNCA">nunca</option>
+              <option ngValue="DATA">em uma data</option>
+              <option ngValue="VEZES">depois de…</option>
+            </select>
+            @if (termina() === 'DATA') {
+              <input
+                class="campo"
+                type="date"
+                name="fimRepeticao"
+                [min]="dataInicio"
+                [(ngModel)]="fimRepeticao"
+                aria-label="Último dia"
+              />
+            }
+            @if (termina() === 'VEZES') {
+              <input
+                class="campo curto"
+                type="number"
+                name="max"
+                min="1"
+                [(ngModel)]="maxOcorrencias"
+                aria-label="Quantas vezes"
+              />
+              <span>vezes</span>
+            }
+          </div>
+        }
+      </fieldset>
+    }
+
+    <input
+      class="campo"
+      name="local"
+      placeholder="Local (ex.: Sala 204, Academia)"
+      maxlength="200"
+      [(ngModel)]="local"
+    />
+    <textarea
+      class="campo"
+      name="descricao"
+      rows="2"
+      placeholder="Descrição"
+      maxlength="2000"
+      [(ngModel)]="descricao"
+    ></textarea>
+
+    <footer>
+      @if (editando()) {
+        <button type="button" class="botao secundario perigo" (click)="apagar.emit()">
+          <span class="icone">delete</span> Apagar
+        </button>
+      }
+      <span class="espaco"></span>
+      <button type="button" class="botao secundario" (click)="fechar.emit()">Cancelar</button>
+      <button type="submit" class="botao">Salvar</button>
+    </footer>
+  </form>
+</app-modal>

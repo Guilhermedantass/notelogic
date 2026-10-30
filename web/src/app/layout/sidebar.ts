@@ -234,6 +234,7 @@ export class Sidebar {
 
   protected readonly itens = [
     { rota: '/hoje', icone: 'today', rotulo: 'Hoje' },
+    { rota: '/agenda', icone: 'calendar_month', rotulo: 'Agenda' },
     { rota: '/flashcards', icone: 'style', rotulo: 'Flashcards' },
     { rota: '/pomodoro', icone: 'timer', rotulo: 'Pomodoro' },
     { rota: '/painel', icone: 'insights', rotulo: 'Painel' },

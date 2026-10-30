@@ -232,3 +232,111 @@ button {
     color: inherit;
   }
 }
+
+// ---- Agenda (FullCalendar) ----
+// O tema "classic" do FullCalendar lê estas variáveis. Em vez da paleta dele, usamos as do app:
+// assim o calendário troca de claro para escuro junto com o resto, sem nada extra.
+:root {
+  --fc-classic-button: var(--superficie);
+  --fc-classic-button-border: var(--borda);
+  --fc-classic-button-strong: var(--violeta);
+  --fc-classic-button-strong-border: var(--violeta);
+  --fc-classic-button-outline: var(--violeta-suave);
+  --fc-classic-button-foreground: var(--texto);
+
+  --fc-classic-primary: var(--violeta);
+  --fc-classic-primary-foreground: #fff;
+
+  --fc-classic-event: var(--violeta);
+  --fc-classic-event-contrast: #fff;
+  --fc-classic-background-event: var(--violeta);
+  --fc-classic-background-event-opacity: 15%;
+  --fc-classic-background-event-foreground-opacity: 50%;
+  --fc-classic-highlight: color-mix(in srgb, var(--violeta) 14%, transparent);
+  --fc-classic-today: color-mix(in srgb, var(--violeta) 6%, transparent);
+  --fc-classic-now: var(--vermelho);
+  --fc-classic-small-dot-width: 8px;
+  --fc-classic-large-dot-width: 10px;
+
+  --fc-classic-background: var(--fundo);
+  --fc-classic-faint: color-mix(in srgb, var(--texto) 3%, transparent);
+  --fc-classic-muted: color-mix(in srgb, var(--texto) 7%, transparent);
+  --fc-classic-strong: color-mix(in srgb, var(--texto) 14%, transparent);
+
+  --fc-classic-foreground: var(--texto);
+  --fc-classic-faint-foreground: color-mix(in srgb, var(--texto-suave) 70%, transparent);
+  --fc-classic-muted-foreground: var(--texto-suave);
+
+  --fc-classic-border: var(--borda);
+  --fc-classic-strong-border: color-mix(in srgb, var(--texto-suave) 50%, transparent);
+}
+
+// O conteúdo de cada evento é nosso (ng-template #eventContent na agenda)
+.nl-conteudo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.78rem;
+  line-height: 1.25;
+
+  .nl-hora {
+    font-weight: 700;
+    opacity: 0.9;
+  }
+
+  .nl-titulo {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .nl-repete {
+    font-size: 13px;
+    vertical-align: -2px;
+  }
+
+  .nl-local {
+    opacity: 0.85;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &.compacto {
+    flex-direction: row;
+    gap: 4px;
+
+    .nl-local {
+      display: none;
+    }
+  }
+
+  // tarefa: o check e o título lado a lado
+  &:not(.evento) {
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+  }
+}
+
+// Tarefas com prazo: contorno na cor da matéria em vez de bloco cheio, para não parecerem eventos
+.nl-tarefa {
+  background: var(--fundo) !important;
+  border: 1px dashed var(--fc-event-color) !important;
+
+  .nl-check {
+    display: inline-grid;
+    color: var(--fc-event-color, var(--violeta));
+
+    .icone {
+      font-size: 16px;
+    }
+  }
+
+  &.concluida .nl-titulo {
+    text-decoration: line-through;
+    opacity: 0.6;
+  }
+}

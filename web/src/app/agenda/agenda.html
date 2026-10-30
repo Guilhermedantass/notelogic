@@ -1,0 +1,120 @@
+<header class="cabecalho">
+  <div>
+    <h1 class="titulo-pagina">Agenda</h1>
+    <p class="subtitulo-pagina">{{ periodo() }}</p>
+  </div>
+  <div class="acoes">
+    <button class="botao secundario" (click)="editandoCategorias.set(true)">
+      <span class="icone">sell</span> Categorias
+    </button>
+    <button class="botao" (click)="novoEvento()"><span class="icone">add</span> Novo evento</button>
+  </div>
+</header>
+
+@if (erro(); as mensagem) {
+  <div class="aviso-erro" role="alert">
+    <span class="icone">error</span>{{ mensagem }}
+    <button (click)="erro.set(null)" aria-label="Fechar"><span class="icone">close</span></button>
+  </div>
+}
+
+<div class="barra">
+  <div class="navegacao">
+    <button class="botao-icone" (click)="anterior()" aria-label="Anterior">
+      <span class="icone">chevron_left</span>
+    </button>
+    <button class="botao secundario" (click)="hoje()">Hoje</button>
+    <button class="botao-icone" (click)="proximo()" aria-label="Próximo">
+      <span class="icone">chevron_right</span>
+    </button>
+  </div>
+  <div class="visoes" role="radiogroup" aria-label="Visão">
+    @for (v of visoes; track v.valor) {
+      <button
+        role="radio"
+        [attr.aria-checked]="visao() === v.valor"
+        [class.ativo]="visao() === v.valor"
+        (click)="trocarVisao(v.valor)"
+      >
+        {{ v.rotulo }}
+      </button>
+    }
+  </div>
+</div>
+
+<div class="calendario">
+  <full-calendar [options]="opcoes">
+    <ng-template #eventContent let-arg>
+      @if (arg.event.extendedProps.tipo === 'tarefa') {
+        <span class="nl-conteudo">
+          <button
+            class="nl-check"
+            [attr.aria-label]="
+              arg.event.extendedProps.tarefa.concluida ? 'Reabrir tarefa' : 'Concluir tarefa'
+            "
+            (click)="alternarTarefa(arg.event.extendedProps.tarefa, $event)"
+          >
+            <span class="icone">{{
+              arg.event.extendedProps.tarefa.concluida ? 'check_circle' : 'radio_button_unchecked'
+            }}</span>
+          </button>
+          <span class="nl-titulo">{{ arg.event.title }}</span>
+        </span>
+      } @else {
+        <!-- no mês, cada evento numa linha só: senão hora + título + local não cabem na célula -->
+        <span class="nl-conteudo evento" [class.compacto]="arg.view.type === 'dayGridMonth'">
+          @if (arg.timeText) {
+            <span class="nl-hora">{{ arg.timeText }}</span>
+          }
+          <span class="nl-titulo">
+            @if (arg.event.extendedProps.evento.repeticao) {
+              <span class="icone nl-repete" aria-label="Repete">repeat</span>
+            }
+            {{ arg.event.title }}
+          </span>
+          @if (arg.event.extendedProps.evento.local) {
+            <span class="nl-local">{{ arg.event.extendedProps.evento.local }}</span>
+          }
+        </span>
+      }
+    </ng-template>
+  </full-calendar>
+</div>
+
+@if (formulario(); as f) {
+  <app-evento-form
+    [categorias]="listaCategorias()"
+    [materias]="listaMaterias()"
+    [evento]="f.evento"
+    [rascunho]="f.rascunho"
+    (salvar)="salvar($event)"
+    (apagar)="apagar()"
+    (fechar)="formulario.set(null)"
+  />
+}
+
+@if (escolha(); as e) {
+  <app-modal [titulo]="e.titulo" style="--largura: 380px" (fechar)="desistirDaEscolha()">
+    <p class="pergunta">Este evento se repete. Aplicar a:</p>
+    <div class="escopos">
+      @for (opcao of e.opcoes; track opcao) {
+        <button class="botao" [class.secundario]="opcao !== e.opcoes[0]" (click)="escolher(opcao)">
+          {{ rotulosEscopo[opcao] }}
+        </button>
+      }
+    </div>
+    @if (!e.opcoes.includes('so-esta')) {
+      <p class="nota">
+        "Só esta" muda apenas data, horário e local. Para mudar outros campos, aplique à série.
+      </p>
+    }
+  </app-modal>
+}
+
+@if (editandoCategorias()) {
+  <app-categorias
+    [categorias]="listaCategorias()"
+    (mudou)="categoriasMudaram()"
+    (fechar)="editandoCategorias.set(false)"
+  />
+}

@@ -166,3 +166,67 @@ export interface Recorrencia {
 
 /** "Só esta" ou "esta e as próximas", nas ações de uma tarefa que se repete. */
 export type Escopo = 'so-esta' | 'proximas';
+
+// ---- Agenda ----
+
+export interface CategoriaEvento {
+  id: number;
+  nome: string;
+  cor: string;
+  /** Os eventos desta categoria aparecem em "próximas datas importantes". */
+  destaque: boolean;
+}
+
+export interface CategoriaRequest {
+  nome: string;
+  cor: string;
+  destaque: boolean;
+}
+
+/**
+ * Um evento como aparece na agenda. Num evento que se repete, cada ocorrência vem com dataOcorrencia (o dia
+ * original pela regra, que identifica a ocorrência para "só esta"); dataInicio/horas já são as do dia.
+ * Horas chegam como "14:00:00".
+ */
+export interface Evento {
+  id: number;
+  titulo: string;
+  descricao: string | null;
+  local: string | null;
+  categoria: CategoriaEvento | null;
+  materia: Materia | null;
+  dataInicio: string;
+  dataFim: string;
+  diaInteiro: boolean;
+  horaInicio: string | null;
+  horaFim: string | null;
+  /** A da categoria, senão a da matéria, senão o violeta do app. */
+  cor: string;
+  repeticao: Regra | null;
+  repeticaoResumo: string | null;
+  dataOcorrencia: string | null;
+  alterada: boolean;
+}
+
+export interface EventoRequest {
+  titulo: string;
+  descricao?: string | null;
+  local?: string | null;
+  categoriaId?: number | null;
+  materiaId?: number | null;
+  dataInicio: string;
+  dataFim?: string | null;
+  diaInteiro: boolean;
+  horaInicio?: string | null;
+  horaFim?: string | null;
+  /** O inicio da regra é ignorado: vale dataInicio. */
+  repeticao?: Regra | null;
+}
+
+/** "Só esta": a ocorrência vai para outro dia, horário ou local. */
+export interface OcorrenciaRequest {
+  data: string;
+  horaInicio?: string | null;
+  horaFim?: string | null;
+  local?: string | null;
+}

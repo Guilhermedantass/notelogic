@@ -32,6 +32,11 @@ export const routes: Routes = [
         loadComponent: () => import('./tarefas/hoje').then((m) => m.Hoje),
       },
       {
+        path: 'agenda',
+        title: 'Agenda · NoteLogic',
+        loadComponent: () => import('./agenda/agenda').then((m) => m.Agenda),
+      },
+      {
         path: 'materias',
         title: 'Matérias · NoteLogic',
         loadComponent: () => import('./materias/materias').then((m) => m.Materias),

@@ -1,21 +1,17 @@
 import { Component, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { DiaDaSemana, Materia, Prioridade, RecorrenciaRequest, TarefaRequest, TipoRecorrencia } from '../core/api.models';
-import { hojeIso } from '../core/datas';
+import {
+  DiaDaSemana,
+  Materia,
+  Prioridade,
+  RecorrenciaRequest,
+  TarefaRequest,
+  TipoRecorrencia,
+} from '../core/api.models';
+import { DIAS_DA_SEMANA, hojeIso } from '../core/datas';
 
 type Repetir = 'NAO' | TipoRecorrencia;
-
-/** Domingo primeiro, como no calendário brasileiro. getDay() do JS também começa no domingo (0). */
-const DIAS: { valor: DiaDaSemana; letra: string; nome: string }[] = [
-  { valor: 'SUNDAY', letra: 'D', nome: 'domingo' },
-  { valor: 'MONDAY', letra: 'S', nome: 'segunda' },
-  { valor: 'TUESDAY', letra: 'T', nome: 'terça' },
-  { valor: 'WEDNESDAY', letra: 'Q', nome: 'quarta' },
-  { valor: 'THURSDAY', letra: 'Q', nome: 'quinta' },
-  { valor: 'FRIDAY', letra: 'S', nome: 'sexta' },
-  { valor: 'SATURDAY', letra: 'S', nome: 'sábado' },
-];
 
 /**
  * O "Add task" da v1: um campo no fim da lista. Enter cria; os detalhes aparecem quando você começa a digitar.
@@ -35,7 +31,7 @@ export class NovaTarefa {
   readonly criar = output<TarefaRequest>();
   readonly criarRecorrente = output<RecorrenciaRequest>();
 
-  protected readonly dias = DIAS;
+  protected readonly dias = DIAS_DA_SEMANA;
   protected readonly titulo = signal('');
   protected readonly hoje = hojeIso();
   protected materiaId: number | null = null;
@@ -44,7 +40,9 @@ export class NovaTarefa {
 
   // ---- repetição ----
   protected readonly repetir = signal<Repetir>('NAO');
-  protected readonly diasSemana = signal<DiaDaSemana[]>([DIAS[new Date().getDay()].valor]);
+  protected readonly diasSemana = signal<DiaDaSemana[]>([
+    DIAS_DA_SEMANA[new Date().getDay()].valor,
+  ]);
   protected intervaloDias = 2;
   protected diaDoMes = new Date().getDate();
   protected acumula = false;
@@ -62,7 +60,12 @@ export class NovaTarefa {
 
     const tipo = this.repetir();
     if (tipo === 'NAO') {
-      this.criar.emit({ titulo, materiaId, prazo: this.prazo || null, prioridade: this.prioridade });
+      this.criar.emit({
+        titulo,
+        materiaId,
+        prazo: this.prazo || null,
+        prioridade: this.prioridade,
+      });
     } else {
       if (tipo === 'SEMANAL' && this.diasSemana().length === 0) return;
       this.criarRecorrente.emit({
