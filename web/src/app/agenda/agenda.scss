@@ -83,6 +83,12 @@
   color: var(--texto-suave);
 }
 
+.rodape-tarefa {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
 @media (max-width: 760px) {
   :host {
     height: calc(100vh - 124px);

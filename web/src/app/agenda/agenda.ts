@@ -16,6 +16,7 @@ import interactionPlugin from '@fullcalendar/angular/interaction';
 import ptBrLocale from 'fullcalendar/locales/pt-br';
 import classicTheme from '@fullcalendar/angular/themes/classic';
 import timeGridPlugin from '@fullcalendar/angular/timegrid';
+import { RouterLink } from '@angular/router';
 import { forkJoin, Observable } from 'rxjs';
 
 import { AgendaService } from '../core/agenda.service';
@@ -31,6 +32,7 @@ import { hojeIso, horaCurta, somarDias } from '../core/datas';
 import { mensagemDeErro } from '../core/erros';
 import { TarefaService } from '../core/tarefa.service';
 import { Modal } from '../layout/modal';
+import { TarefaItem } from '../tarefas/tarefa-item';
 import { Categorias } from './categorias';
 import { paraCalendario, Props, requestDe, tarefaParaCalendario } from './calendario';
 import { EventoForm, EventoSalvo, RascunhoEvento } from './evento-form';
@@ -62,7 +64,7 @@ const ROTULOS_ESCOPO: Record<EscopoEvento, string> = {
  */
 @Component({
   selector: 'app-agenda',
-  imports: [FullCalendarModule, EventoForm, Categorias, Modal],
+  imports: [FullCalendarModule, EventoForm, Categorias, Modal, TarefaItem, RouterLink],
   templateUrl: './agenda.html',
   styleUrl: './agenda.scss',
 })
@@ -85,6 +87,9 @@ export class Agenda {
   protected readonly formulario = signal<Formulario | null>(null);
   protected readonly escolha = signal<Escolha | null>(null);
   protected readonly editandoCategorias = signal(false);
+  /** A tarefa clicada no calendário, aberta para ver (e concluir). Editar fica na tela Tarefas. */
+  protected readonly tarefaAberta = signal<Tarefa | null>(null);
+  protected readonly hojeIso = hojeIso();
 
   protected readonly categorias = httpResource<CategoriaEvento[]>(() => '/api/agenda/categorias', {
     defaultValue: [],
@@ -230,6 +235,8 @@ export class Agenda {
     const props = info.event.extendedProps as Props;
     if (props.tipo === 'evento') {
       this.formulario.set({ rascunho: null, evento: props.evento });
+    } else {
+      this.tarefaAberta.set(props.tarefa);
     }
   }
 
@@ -318,6 +325,19 @@ export class Agenda {
           );
         }
       },
+    });
+  }
+
+  /** Concluir ou reabrir pela janela da tarefa: a janela continua aberta, já com o estado novo. */
+  protected alternarTarefaAberta(t: Tarefa): void {
+    const acao = t.concluida ? this.tarefas.reabrir(t.id) : this.tarefas.concluir(t.id);
+    this.erro.set(null);
+    acao.subscribe({
+      next: (atualizada) => {
+        this.tarefaAberta.set(atualizada);
+        this.recarregar();
+      },
+      error: (e) => this.erro.set(mensagemDeErro(e)),
     });
   }
 

@@ -116,6 +116,23 @@
   </app-modal>
 }
 
+@if (tarefaAberta(); as t) {
+  <app-modal titulo="Tarefa" (fechar)="tarefaAberta.set(null)">
+    <app-tarefa-item
+      [tarefa]="t"
+      [hoje]="hojeIso"
+      [somenteConcluir]="true"
+      (concluir)="alternarTarefaAberta($event)"
+      (reabrir)="alternarTarefaAberta($event)"
+    />
+    <footer class="rodape-tarefa">
+      <a routerLink="/tarefas" class="botao secundario">
+        <span class="icone">edit</span> Editar em Tarefas
+      </a>
+    </footer>
+  </app-modal>
+}
+
 @if (editandoCategorias()) {
   <app-categorias
     [categorias]="listaCategorias()"
