@@ -9,14 +9,14 @@ Em ordem de prioridade, por bloco. Cada bloco é quebrado em partes pequenas, ca
 
 **Feito:** tarefas recorrentes (out/2026).
 
-### A. Agenda — **em modelagem** (ver [seção 4](#agenda-estilo-google-agenda))
+### A. Agenda — **feito (A1–A4)**, A5 fica para depois (ver [seção 4](#agenda-estilo-google-agenda))
 
 | # | Feature | O que é |
 |---|---|---|
 | A1 | ✅ Evento | Prova, aula, treino, compromisso: data, horário ou dia inteiro |
-| A2 | ✅ Eventos que se repetem (API) | Reaproveita a regra das tarefas recorrentes; exceções para "só esta" |
-| A3 | Tela Agenda | Mês, semana e dia, com eventos e tarefas com prazo |
-| A4 | Hoje vira o resumo do dia | Agenda de hoje, próximas datas importantes (30 dias) e as tarefas |
+| A2 | ✅ Eventos que se repetem | Reaproveita a regra das tarefas recorrentes; exceções para "só esta" |
+| A3 | ✅ Tela Agenda | Mês, semana e dia, com eventos e tarefas com prazo |
+| A4 | ✅ Hoje vira o resumo do dia | Agenda de hoje, próximas datas importantes (30 dias) e as tarefas |
 | A5 | *Depois* | Lembretes (depende do P2), pausar rotina (férias), prova cria tarefa de revisão, pomodoros na semana, `.ics` |
 
 ### D. Deploy e CI (ver [seção 2](#2-deploy))

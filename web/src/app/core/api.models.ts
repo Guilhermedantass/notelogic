@@ -230,3 +230,23 @@ export interface OcorrenciaRequest {
   horaFim?: string | null;
   local?: string | null;
 }
+
+/** GET /api/agenda/hoje: a parte da agenda na tela Hoje. */
+export interface ResumoDoDia {
+  hoje: string;
+  agenda: Evento[];
+  importantes: DataImportante[];
+}
+
+export interface DataImportante {
+  tipo: 'EVENTO' | 'TAREFA';
+  id: number;
+  titulo: string;
+  /** O nome da categoria do evento, ou "Tarefa". */
+  rotulo: string;
+  data: string;
+  hora: string | null;
+  cor: string;
+  /** 0 = hoje (ou um evento de vários dias que já começou). */
+  diasAte: number;
+}

@@ -4,7 +4,10 @@
     <p class="subtitulo-pagina">{{ dataExtensa }}</p>
   </div>
   @if (listaPendentes().length > 0) {
-    <span class="contador">{{ listaPendentes().length }} {{ listaPendentes().length === 1 ? 'pendente' : 'pendentes' }}</span>
+    <span class="contador"
+      >{{ listaPendentes().length }}
+      {{ listaPendentes().length === 1 ? 'pendente' : 'pendentes' }}</span
+    >
   }
 </header>
 
@@ -92,5 +95,10 @@
     }
   </section>
 
-  <img class="ilustracao" src="img/tarefas.svg" alt="" />
+  <aside class="lateral">
+    @if (resumo.hasValue()) {
+      <app-resumo-do-dia [resumo]="resumo.value()" />
+    }
+    <img class="ilustracao" src="img/tarefas.svg" alt="" />
+  </aside>
 </div>

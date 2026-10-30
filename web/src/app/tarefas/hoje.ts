@@ -2,7 +2,16 @@ import { httpResource } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { Escopo, Materia, Recorrencia, RecorrenciaRequest, Tarefa, TarefaRequest } from '../core/api.models';
+import { ResumoDoDiaComponent } from '../agenda/resumo-do-dia';
+import {
+  Escopo,
+  Materia,
+  Recorrencia,
+  RecorrenciaRequest,
+  ResumoDoDia,
+  Tarefa,
+  TarefaRequest,
+} from '../core/api.models';
 import { formatarDia, GrupoPrazo, grupoDoPrazo, hojeIso } from '../core/datas';
 import { mensagemDeErro } from '../core/erros';
 import { RecorrenciaService } from '../core/recorrencia.service';
@@ -23,10 +32,13 @@ const TITULOS: Record<GrupoPrazo, string> = {
   'sem-prazo': 'Sem prazo',
 };
 
-/** A tela principal: tarefas pendentes agrupadas por prazo, filtro por matéria e as concluídas embaixo. */
+/**
+ * A tela principal, o resumo do dia: tarefas pendentes agrupadas por prazo (com filtro por matéria e as concluídas
+ * embaixo) e, ao lado, a agenda de hoje e as próximas datas importantes.
+ */
 @Component({
   selector: 'app-hoje',
-  imports: [TarefaItem, NovaTarefa],
+  imports: [TarefaItem, NovaTarefa, ResumoDoDiaComponent],
   templateUrl: './hoje.html',
   styleUrl: './hoje.scss',
 })
@@ -59,9 +71,7 @@ export class Hoje {
   // Devolver undefined deixa o resource parado: as concluídas só são buscadas quando você abre a seção.
   protected readonly concluidas = httpResource<Tarefa[]>(
     () =>
-      this.mostrarConcluidas()
-        ? { url: '/api/tarefas', params: this.filtro(true) }
-        : undefined,
+      this.mostrarConcluidas() ? { url: '/api/tarefas', params: this.filtro(true) } : undefined,
     { defaultValue: [] },
   );
 
@@ -70,8 +80,14 @@ export class Hoje {
     defaultValue: [],
   });
   private readonly recorrenciaPorId = computed(
-    () => new Map((this.recorrencias.hasValue() ? this.recorrencias.value() : []).map((r) => [r.id, r])),
+    () =>
+      new Map(
+        (this.recorrencias.hasValue() ? this.recorrencias.value() : []).map((r) => [r.id, r]),
+      ),
   );
+
+  /** Agenda de hoje e datas importantes. Recarrega junto com as tarefas: entregas de prioridade alta entram nele. */
+  protected readonly resumo = httpResource<ResumoDoDia>(() => '/api/agenda/hoje');
 
   protected readonly listaMaterias = computed(() =>
     this.materias.hasValue() ? this.materias.value() : [],
@@ -131,8 +147,18 @@ export class Hoje {
     }
   }
 
-  protected salvar({ tarefa, dados, escopo }: { tarefa: Tarefa; dados: TarefaRequest; escopo: Escopo }): void {
-    const regra = tarefa.recorrencia ? this.recorrenciaPorId().get(tarefa.recorrencia.id) : undefined;
+  protected salvar({
+    tarefa,
+    dados,
+    escopo,
+  }: {
+    tarefa: Tarefa;
+    dados: TarefaRequest;
+    escopo: Escopo;
+  }): void {
+    const regra = tarefa.recorrencia
+      ? this.recorrenciaPorId().get(tarefa.recorrencia.id)
+      : undefined;
     if (escopo === 'proximas' && regra && tarefa.dataOcorrencia) {
       // muda o molde da regra (mantendo o "quando") e refaz as ocorrências pendentes daqui para frente
       this.executar(
@@ -158,6 +184,7 @@ export class Hoje {
         this.pendentes.reload();
         this.concluidas.reload();
         this.recorrencias.reload();
+        this.resumo.reload();
       },
       error: (e) => this.erro.set(mensagemDeErro(e)),
     });

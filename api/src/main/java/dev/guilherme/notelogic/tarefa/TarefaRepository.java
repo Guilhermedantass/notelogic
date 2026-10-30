@@ -30,6 +30,16 @@ public interface TarefaRepository extends JpaRepository<Tarefa, Long> {
     @EntityGraph(attributePaths = { "materia", "recorrencia" })
     Optional<Tarefa> findByIdAndUsuarioId(Long id, Long usuarioId);
 
+    /** Para "próximas datas importantes" no Hoje: pendentes de uma prioridade, com prazo no período. */
+    @EntityGraph(attributePaths = { "materia" })
+    @Query("""
+            select t from Tarefa t
+            where t.usuarioId = :usuarioId and t.concluida = false and t.expirada = false
+              and t.prioridade = :prioridade and t.prazo between :de and :ate
+            order by t.prazo, t.id
+            """)
+    List<Tarefa> pendentesComPrazoEntre(Long usuarioId, Prioridade prioridade, LocalDate de, LocalDate ate);
+
     // ---- usados pelo GeradorDeOcorrencias e pelo RecorrenciaService ----
 
     boolean existsByRecorrenciaIdAndDataOcorrencia(Long recorrenciaId, LocalDate data);
