@@ -60,22 +60,27 @@
           </button>
           <span class="nl-titulo">{{ arg.event.title }}</span>
         </span>
-      } @else {
+      } @else if (arg.event.extendedProps.evento; as ev) {
         <!-- no mês, cada evento numa linha só: senão hora + título + local não cabem na célula -->
         <span class="nl-conteudo evento" [class.compacto]="arg.view.type === 'dayGridMonth'">
           @if (arg.timeText) {
             <span class="nl-hora">{{ arg.timeText }}</span>
           }
           <span class="nl-titulo">
-            @if (arg.event.extendedProps.evento.repeticao) {
+            @if (ev.repeticao) {
               <span class="icone nl-repete" aria-label="Repete">repeat</span>
             }
             {{ arg.event.title }}
           </span>
-          @if (arg.event.extendedProps.evento.local) {
-            <span class="nl-local">{{ arg.event.extendedProps.evento.local }}</span>
+          @if (ev.local) {
+            <span class="nl-local">{{ ev.local }}</span>
           }
         </span>
+      } @else {
+        <!-- o bloco provisório enquanto você clica ou arrasta num horário vazio: não é evento nem tarefa -->
+        <span class="nl-conteudo evento"
+          ><span class="nl-hora">{{ arg.timeText }}</span></span
+        >
       }
     </ng-template>
   </full-calendar>
