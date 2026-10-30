@@ -13,8 +13,8 @@ Em ordem de prioridade, por bloco. Cada bloco é quebrado em partes pequenas, ca
 
 | # | Feature | O que é |
 |---|---|---|
-| A1 | Evento | Prova, aula, treino, compromisso: data, horário ou dia inteiro |
-| A2 | Eventos que se repetem | Reaproveita a regra das tarefas recorrentes; exceções para "só esta" |
+| A1 | ✅ Evento | Prova, aula, treino, compromisso: data, horário ou dia inteiro |
+| A2 | ✅ Eventos que se repetem (API) | Reaproveita a regra das tarefas recorrentes; exceções para "só esta" |
 | A3 | Tela Agenda | Mês, semana e dia, com eventos e tarefas com prazo |
 | A4 | Hoje vira o resumo do dia | Agenda de hoje, próximas datas importantes (30 dias) e as tarefas |
 | A5 | *Depois* | Lembretes (depende do P2), pausar rotina (férias), prova cria tarefa de revisão, pomodoros na semana, `.ics` |
@@ -137,7 +137,7 @@ próximo passo de aprendizado.
 
 ### Agenda — A2: Eventos que se repetem (30/10/2026)
 
-- **A regra de repetição vira uma peça só** (`RegraDeRepeticao`, um `@Embeddable` com o cálculo das datas), usada
+- **A regra de repetição vira uma peça só** (`RegraRecorrencia`, agora um `@Embeddable`; o cálculo fica no `CalendarioRecorrencia`), usada
   pelas tarefas recorrentes e pelos eventos. Os tipos e o fim (nunca, até uma data, depois de N vezes) são os mesmos.
 - **As ocorrências de eventos são só calculadas** para exibir, nunca salvas: não há nada para concluir.
 - **Só esta:** dá para cancelar ou mudar data, horário e local. Fica gravado como exceção (`evento_excecao`).
