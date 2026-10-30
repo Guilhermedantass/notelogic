@@ -31,8 +31,19 @@
   grid-area: tarefas;
 }
 
-.agenda {
+.lateral {
   grid-area: agenda;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+// como na tela Tarefas: no tema escuro (--ilustracao: none) e em telas estreitas, some
+.ilustracao {
+  display: var(--ilustracao, block);
+  width: 100%;
+  max-width: 320px;
+  align-self: center;
 }
 
 .datas {
@@ -40,6 +51,10 @@
 }
 
 @media (max-width: 1000px) {
+  .ilustracao {
+    display: none;
+  }
+
   .grade {
     grid-template-columns: 1fr;
     grid-template-areas:

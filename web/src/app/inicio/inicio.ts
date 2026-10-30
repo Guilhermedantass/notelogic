@@ -40,6 +40,7 @@ export class Inicio {
   });
 
   protected readonly erro = signal<string | null>(null);
+  protected readonly semIlustracao = signal(false);
 
   protected readonly materias = httpResource<Materia[]>(() => '/api/materias', {
     defaultValue: [],

@@ -74,8 +74,17 @@
     />
   </section>
 
+  <aside class="lateral">
+    @if (resumo.hasValue()) {
+      <app-agenda-de-hoje [eventos]="resumo.value().agenda" />
+    }
+    <!-- ilustração da Storyset (web/public/img/inicio.svg); sem o arquivo, some em vez de aparecer quebrada -->
+    @if (!semIlustracao()) {
+      <img class="ilustracao" src="img/inicio.svg" alt="" (error)="semIlustracao.set(true)" />
+    }
+  </aside>
+
   @if (resumo.hasValue()) {
-    <app-agenda-de-hoje class="agenda" [eventos]="resumo.value().agenda" />
     <app-datas-importantes class="datas" [datas]="resumo.value().importantes" />
   }
 </div>
