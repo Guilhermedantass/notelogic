@@ -5,7 +5,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 import dev.guilherme.notelogic.materia.Materia;
+import dev.guilherme.notelogic.recorrencia.RegraRecorrencia;
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -55,6 +58,17 @@ public class Evento {
 
     private LocalTime horaFim;
 
+    /** Nulo = acontece uma vez só. A regra começa sempre em dataInicio (ver o check da V9). */
+    @Embedded
+    @AttributeOverride(name = "tipo", column = @Column(name = "repeticao_tipo"))
+    @AttributeOverride(name = "diasSemana", column = @Column(name = "repeticao_dias_semana"))
+    @AttributeOverride(name = "intervaloDias", column = @Column(name = "repeticao_intervalo_dias"))
+    @AttributeOverride(name = "diaDoMes", column = @Column(name = "repeticao_dia_do_mes"))
+    @AttributeOverride(name = "inicio", column = @Column(name = "repeticao_inicio"))
+    @AttributeOverride(name = "fim", column = @Column(name = "repeticao_fim"))
+    @AttributeOverride(name = "maxOcorrencias", column = @Column(name = "repeticao_max_ocorrencias"))
+    private RegraRecorrencia repeticao;
+
     @Column(nullable = false, updatable = false)
     private Instant criadoEm;
 
@@ -63,14 +77,15 @@ public class Evento {
     }
 
     public Evento(Long usuarioId, String titulo, String descricao, String local, CategoriaEvento categoria,
-            Materia materia, PeriodoEvento periodo) {
+            Materia materia, PeriodoEvento periodo, RegraRecorrencia repeticao) {
         this.usuarioId = usuarioId;
         this.criadoEm = Instant.now();
-        editar(titulo, descricao, local, categoria, materia, periodo);
+        editar(titulo, descricao, local, categoria, materia, periodo, repeticao);
     }
 
+    /** {@code repeticao} já vem validada e começando em periodo.dataInicio() (ver EventoService). */
     public void editar(String titulo, String descricao, String local, CategoriaEvento categoria, Materia materia,
-            PeriodoEvento periodo) {
+            PeriodoEvento periodo, RegraRecorrencia repeticao) {
         this.titulo = titulo;
         this.descricao = descricao;
         this.local = local;
@@ -81,10 +96,24 @@ public class Evento {
         this.diaInteiro = periodo.diaInteiro();
         this.horaInicio = periodo.horaInicio();
         this.horaFim = periodo.horaFim();
+        this.repeticao = repeticao;
+    }
+
+    /** "Esta e as próximas" / "parar de repetir": a série para de valer depois de {@code ultimoDia}. */
+    public void encerrarRepeticaoEm(LocalDate ultimoDia) {
+        this.repeticao = repeticao.comFim(ultimoDia);
+    }
+
+    public boolean seRepete() {
+        return repeticao != null;
     }
 
     public PeriodoEvento periodo() {
         return new PeriodoEvento(dataInicio, dataFim, diaInteiro, horaInicio, horaFim);
+    }
+
+    public RegraRecorrencia getRepeticao() {
+        return repeticao;
     }
 
     public Long getId() {

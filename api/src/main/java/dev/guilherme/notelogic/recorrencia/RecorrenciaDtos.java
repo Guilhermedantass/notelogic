@@ -28,6 +28,11 @@ public final class RecorrenciaDtos {
             LocalDate fim,
             @Min(1) Integer maxOcorrencias) {
 
+        /** Para os eventos: a regra começa sempre no próprio evento, e o campo inicio é ignorado. */
+        public RegraRecorrencia comecandoEm(LocalDate inicioDoEvento) {
+            return new RegraRecorrencia(tipo, diasSemana, intervaloDias, diaDoMes, inicioDoEvento, fim, maxOcorrencias);
+        }
+
         RegraRecorrencia paraRegra(LocalDate hoje) {
             return new RegraRecorrencia(tipo, diasSemana, intervaloDias, diaDoMes, inicio != null ? inicio : hoje, fim,
                     maxOcorrencias);

@@ -4,6 +4,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 import dev.guilherme.notelogic.materia.MateriaResponse;
+import dev.guilherme.notelogic.recorrencia.CalendarioRecorrencia;
+import dev.guilherme.notelogic.recorrencia.RecorrenciaDtos.RegraRequest;
+import dev.guilherme.notelogic.recorrencia.RegraRecorrencia;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -35,7 +39,10 @@ public final class AgendaDtos {
         }
     }
 
-    /** Formato de cada campo. A coerência entre datas e horas fica em PeriodoEvento. */
+    /**
+     * Formato de cada campo. A coerência entre datas e horas fica em PeriodoEvento.
+     * {@code repeticao} é a mesma regra das tarefas recorrentes; o inicio dela é ignorado (vale dataInicio).
+     */
     public record EventoRequest(
             @NotBlank @Size(max = 200) String titulo,
             @Size(max = 2000) String descricao,
@@ -46,25 +53,48 @@ public final class AgendaDtos {
             LocalDate dataFim,
             Boolean diaInteiro,
             LocalTime horaInicio,
-            LocalTime horaFim) {
+            LocalTime horaFim,
+            @Valid RegraRequest repeticao) {
 
         PeriodoEvento periodo() {
             return PeriodoEvento.de(dataInicio, dataFim, Boolean.TRUE.equals(diaInteiro), horaInicio, horaFim);
         }
     }
 
-    /** {@code cor} já vem resolvida: a da categoria, senão a da matéria, senão a do app. */
+    /** "Só esta": a ocorrência vai para outro dia, horário ou local. Num evento de dia inteiro, as horas são ignoradas. */
+    public record OcorrenciaRequest(
+            @NotNull LocalDate data,
+            LocalTime horaInicio,
+            LocalTime horaFim,
+            @Size(max = 200) String local) {
+    }
+
+    /**
+     * Um evento como aparece na agenda. {@code cor} já vem resolvida: a da categoria, senão a da matéria, senão a do
+     * app. Num evento que se repete, cada ocorrência vem com {@code dataOcorrencia} (o dia original pela regra, que é
+     * o que se usa para editar "só esta") e as datas e horas do dia.
+     */
     public record EventoResponse(Long id, String titulo, String descricao, String local, CategoriaResponse categoria,
             MateriaResponse materia, LocalDate dataInicio, LocalDate dataFim, boolean diaInteiro,
-            LocalTime horaInicio, LocalTime horaFim, String cor) {
+            LocalTime horaInicio, LocalTime horaFim, String cor, RegraRecorrencia repeticao, String repeticaoResumo,
+            LocalDate dataOcorrencia, boolean alterada) {
 
+        /** O evento em si (num que se repete, a série, a partir do primeiro dia). */
         public static EventoResponse de(Evento e) {
-            PeriodoEvento p = e.periodo();
+            return de(OcorrenciaEvento.avulso(e));
+        }
+
+        public static EventoResponse de(OcorrenciaEvento o) {
+            Evento e = o.evento();
+            PeriodoEvento p = o.periodo();
             CategoriaResponse categoria = e.getCategoria() != null ? CategoriaResponse.de(e.getCategoria()) : null;
             MateriaResponse materia = e.getMateria() != null ? MateriaResponse.de(e.getMateria()) : null;
             String cor = categoria != null ? categoria.cor() : materia != null ? materia.cor() : COR_PADRAO;
-            return new EventoResponse(e.getId(), e.getTitulo(), e.getDescricao(), e.getLocal(), categoria, materia,
-                    p.dataInicio(), p.dataFim(), p.diaInteiro(), p.horaInicio(), p.horaFim(), cor);
+            RegraRecorrencia repeticao = e.getRepeticao();
+            String resumo = repeticao != null ? CalendarioRecorrencia.descrever(repeticao) : null;
+            return new EventoResponse(e.getId(), e.getTitulo(), e.getDescricao(), o.local(), categoria, materia,
+                    p.dataInicio(), p.dataFim(), p.diaInteiro(), p.horaInicio(), p.horaFim(), cor, repeticao, resumo,
+                    o.dataOcorrencia(), o.alterada());
         }
     }
 }

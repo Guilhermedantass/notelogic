@@ -28,7 +28,7 @@ public class DiasDaSemanaConverter implements AttributeConverter<Set<DayOfWeek>,
     @Override
     public Set<DayOfWeek> convertToEntityAttribute(String coluna) {
         if (coluna == null || coluna.isBlank()) {
-            return EnumSet.noneOf(DayOfWeek.class);
+            return null; // o RegraRecorrencia troca por um conjunto vazio; nulo deixa o evento sem repetição ser nulo
         }
         return Arrays.stream(coluna.split(","))
                 .map(DayOfWeek::valueOf)

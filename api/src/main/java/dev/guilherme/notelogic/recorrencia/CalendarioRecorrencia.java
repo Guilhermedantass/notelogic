@@ -68,6 +68,20 @@ public final class CalendarioRecorrencia {
         return datas;
     }
 
+    /**
+     * As datas da regra entre {@code de} e {@code ate}, inclusive, JÁ respeitando o limite de ocorrências
+     * ("depois de 10 vezes" conta desde o início, mesmo que o período pedido comece depois).
+     */
+    public static List<LocalDate> ocorrencias(RegraRecorrencia regra, LocalDate de, LocalDate ate) {
+        if (regra.maxOcorrencias() == null) {
+            return entre(regra, de.isBefore(regra.inicio()) ? regra.inicio() : de, ate);
+        }
+        List<LocalDate> todas = entre(regra, regra.inicio(), ate);
+        return todas.subList(0, Math.min(todas.size(), regra.maxOcorrencias())).stream()
+                .filter(dia -> !dia.isBefore(de))
+                .toList();
+    }
+
     /** "Todo dia", "Dias úteis", "Toda segunda e quarta", "A cada 3 dias", "Todo mês no dia 15". */
     public static String descrever(RegraRecorrencia regra) {
         return switch (regra.tipo()) {

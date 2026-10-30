@@ -17,8 +17,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import dev.guilherme.notelogic.agenda.AgendaDtos.EventoRequest;
 import dev.guilherme.notelogic.agenda.AgendaDtos.EventoResponse;
+import dev.guilherme.notelogic.agenda.AgendaDtos.OcorrenciaRequest;
 import jakarta.validation.Valid;
 
+/**
+ * Eventos da agenda. Num evento que se repete:
+ * - "só esta" é /ocorrencias/{dia}, onde {dia} é a dataOcorrencia (o dia original pela regra);
+ * - "esta e as próximas" é editar/apagar o evento com ?aPartirDe={dia};
+ * - sem aPartirDe, vale para a série inteira.
+ */
 @RestController
 @RequestMapping("/api/eventos")
 public class EventoController {
@@ -47,13 +54,27 @@ public class EventoController {
     }
 
     @PutMapping("/{id}")
-    public EventoResponse editar(@PathVariable Long id, @Valid @RequestBody EventoRequest request) {
-        return EventoResponse.de(service.editar(id, request));
+    public EventoResponse editar(@PathVariable Long id, @RequestParam(required = false) LocalDate aPartirDe,
+            @Valid @RequestBody EventoRequest request) {
+        return EventoResponse.de(service.editar(id, aPartirDe, request));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void remover(@PathVariable Long id) {
-        service.remover(id);
+    public void remover(@PathVariable Long id, @RequestParam(required = false) LocalDate aPartirDe) {
+        service.remover(id, aPartirDe);
+    }
+
+    @PutMapping("/{id}/ocorrencias/{dia}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void alterarOcorrencia(@PathVariable Long id, @PathVariable LocalDate dia,
+            @Valid @RequestBody OcorrenciaRequest request) {
+        service.alterarOcorrencia(id, dia, request);
+    }
+
+    @DeleteMapping("/{id}/ocorrencias/{dia}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void cancelarOcorrencia(@PathVariable Long id, @PathVariable LocalDate dia) {
+        service.cancelarOcorrencia(id, dia);
     }
 }

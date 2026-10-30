@@ -244,7 +244,7 @@ class AgendaControllerTests {
         Long outro = Autenticacao.logarComo(usuarios, "outro@teste.dev");
         Long categoriaDoOutro = categorias.save(new CategoriaEvento(outro, "Dele", "#000000", false)).getId();
         Long eventoDoOutro = eventos.save(new Evento(outro, "Dele", null, null, null, null,
-                PeriodoEvento.de(LocalDate.of(2026, 11, 3), null, false, LocalTime.of(9, 0), null))).getId();
+                PeriodoEvento.de(LocalDate.of(2026, 11, 3), null, false, LocalTime.of(9, 0), null), null)).getId();
 
         Autenticacao.logarComo(usuarios, "eu@teste.dev");
 
